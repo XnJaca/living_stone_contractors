@@ -1,0 +1,11 @@
+# robots.txt for Living Stone Contractors
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://livingstonecontractors.com/sitemap-index.xml
+
+# Disallow admin areas
+Disallow: /admin/
+Disallow: /api/

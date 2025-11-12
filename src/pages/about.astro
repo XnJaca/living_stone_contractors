@@ -1,0 +1,102 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+---
+
+<MainLayout
+  title="About Us - Living Stone Contractors"
+  description="Learn about Living Stone Contractors. Over 15 years of quality craftsmanship and customer satisfaction in home renovation and construction."
+>
+  <!-- Hero Section -->
+  <section class="relative py-24 bg-gray-900">
+    <div class="absolute inset-0 bg-gradient-to-r from-black/70 to-black/50 z-10"></div>
+    <div
+      class="absolute inset-0 bg-cover bg-center"
+      style="background-image: url('/images/placeholders/about-image.jpg');"
+    ></div>
+
+    <div class="container-custom relative z-20 text-white text-center">
+      <h1 class="font-heading font-bold mb-6">About Us</h1>
+      <p class="text-xl max-w-3xl mx-auto">
+        Building dreams, creating lasting value
+      </p>
+    </div>
+  </section>
+
+  <!-- Content Section -->
+  <section class="section-padding bg-white">
+    <div class="container-custom">
+      <div class="max-w-4xl mx-auto">
+        <h2 class="mb-8">Our Story</h2>
+
+        <div class="prose prose-lg max-w-none space-y-6 text-gray-600">
+          <p>
+            Living Stone Contractors, LLC has been serving homeowners with quality craftsmanship
+            and professional service for over 15 years. What started as a small family business
+            has grown into a trusted name in home renovation and construction.
+          </p>
+
+          <p>
+            Our commitment to excellence and customer satisfaction has been the foundation of our
+            success. Every project, regardless of size, receives our full attention and expertise.
+          </p>
+
+          <h3 class="text-2xl font-heading font-bold text-gray-900 mt-8 mb-4">Our Mission</h3>
+          <p>
+            To provide exceptional home renovation services that exceed our clients' expectations
+            through quality craftsmanship, transparent communication, and unwavering commitment
+            to customer satisfaction.
+          </p>
+
+          <h3 class="text-2xl font-heading font-bold text-gray-900 mt-8 mb-4">Why Choose Us</h3>
+          <ul class="list-disc pl-6 space-y-2">
+            <li>Over 15 years of experience in home renovation</li>
+            <li>Fully licensed and insured</li>
+            <li>Transparent pricing with no hidden fees</li>
+            <li>Quality materials and expert craftsmanship</li>
+            <li>Excellent customer service and communication</li>
+            <li>On-time project completion</li>
+            <li>Warranty on all work performed</li>
+          </ul>
+
+          <h3 class="text-2xl font-heading font-bold text-gray-900 mt-8 mb-4">Our Values</h3>
+          <div class="grid md:grid-cols-2 gap-6 mt-6">
+            <div class="bg-gray-50 p-6 rounded-lg">
+              <h4 class="font-semibold text-lg mb-2">Quality First</h4>
+              <p class="text-sm">We never compromise on quality. Every project is completed to the highest standards.</p>
+            </div>
+            <div class="bg-gray-50 p-6 rounded-lg">
+              <h4 class="font-semibold text-lg mb-2">Integrity</h4>
+              <p class="text-sm">Honest communication and transparent business practices in everything we do.</p>
+            </div>
+            <div class="bg-gray-50 p-6 rounded-lg">
+              <h4 class="font-semibold text-lg mb-2">Customer Focus</h4>
+              <p class="text-sm">Your satisfaction is our priority. We listen, adapt, and deliver on our promises.</p>
+            </div>
+            <div class="bg-gray-50 p-6 rounded-lg">
+              <h4 class="font-semibold text-lg mb-2">Innovation</h4>
+              <p class="text-sm">We stay current with the latest techniques and materials to provide the best solutions.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="section-padding bg-primary-600 text-white">
+    <div class="container-custom text-center">
+      <h2 class="mb-6">Ready to Work With Us?</h2>
+      <p class="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+        Let's discuss your project and how we can help bring your vision to life.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/contact" class="btn bg-white text-primary-600 hover:bg-gray-100 text-lg px-8 py-4">
+          Get Free Estimate
+        </a>
+        <a href="/services" class="btn btn-outline border-white text-white hover:bg-white hover:text-primary-600 text-lg px-8 py-4">
+          View Our Services
+        </a>
+      </div>
+    </div>
+  </section>
+</MainLayout>

@@ -1,0 +1,127 @@
+---
+const currentPath = Astro.url.pathname;
+
+const navItems = [
+  { name: 'Home', href: '/' },
+  { name: 'Services', href: '/services' },
+  { name: 'About', href: '/about' },
+  { name: 'Contact', href: '/contact' },
+];
+---
+
+<header class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
+  <nav class="container-custom">
+    <div class="flex items-center justify-between h-20">
+      <!-- Logo -->
+      <a href="/" class="flex items-center space-x-3">
+        <div class="w-12 h-12 bg-primary-600 rounded-lg flex items-center justify-center">
+          <span class="text-white font-bold text-xl">LS</span>
+        </div>
+        <div class="hidden md:flex flex-col">
+          <span class="font-heading font-bold text-lg leading-tight text-gray-900">Living Stone</span>
+          <span class="text-xs text-gray-600 leading-tight">Contractors, LLC</span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <div class="hidden md:flex items-center space-x-8">
+        {navItems.map((item) => (
+          <a
+            href={item.href}
+            class={`font-medium transition-colors ${
+              currentPath === item.href
+                ? 'text-primary-600'
+                : 'text-gray-700 hover:text-primary-600'
+            }`}
+          >
+            {item.name}
+          </a>
+        ))}
+      </div>
+
+      <!-- CTA Button -->
+      <div class="hidden md:flex items-center space-x-4">
+        <a
+          href="tel:+1234567890"
+          class="text-primary-600 font-semibold hover:text-primary-700"
+        >
+          (123) 456-7890
+        </a>
+        <a href="/contact" class="btn btn-primary">
+          Free Estimate
+        </a>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button
+        id="mobile-menu-button"
+        class="md:hidden p-2 rounded-lg hover:bg-gray-100"
+        aria-label="Toggle mobile menu"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"
+          ></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden pb-4">
+      <div class="flex flex-col space-y-4">
+        {navItems.map((item) => (
+          <a
+            href={item.href}
+            class={`font-medium py-2 transition-colors ${
+              currentPath === item.href
+                ? 'text-primary-600'
+                : 'text-gray-700 hover:text-primary-600'
+            }`}
+          >
+            {item.name}
+          </a>
+        ))}
+        <a
+          href="tel:+1234567890"
+          class="text-primary-600 font-semibold py-2"
+        >
+          📞 (123) 456-7890
+        </a>
+        <a href="/contact" class="btn btn-primary">
+          Free Estimate
+        </a>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- Spacer to prevent content from going under fixed header -->
+<div class="h-20"></div>
+
+<script>
+  // Mobile menu toggle
+  const button = document.getElementById('mobile-menu-button');
+  const menu = document.getElementById('mobile-menu');
+
+  button?.addEventListener('click', () => {
+    menu?.classList.toggle('hidden');
+  });
+
+  // Close mobile menu when clicking outside
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (!button?.contains(target) && !menu?.contains(target)) {
+      menu?.classList.add('hidden');
+    }
+  });
+
+  // Close mobile menu on window resize
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768) {
+      menu?.classList.add('hidden');
+    }
+  });
+</script>

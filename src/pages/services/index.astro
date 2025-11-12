@@ -1,0 +1,67 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import ServiceCard from '../../components/ServiceCard.astro';
+import { getCollection } from 'astro:content';
+
+const allServices = await getCollection('services');
+const sortedServices = allServices.sort((a, b) => a.data.order - b.data.order);
+---
+
+<MainLayout
+  title="Our Services - Living Stone Contractors"
+  description="Comprehensive home renovation and construction services. Interior, exterior, roofing, masonry, kitchens, baths, basements, and siding."
+>
+  <!-- Hero Section -->
+  <section class="relative py-24 bg-gray-900">
+    <div class="absolute inset-0 bg-gradient-to-r from-black/70 to-black/50 z-10"></div>
+    <div
+      class="absolute inset-0 bg-cover bg-center"
+      style="background-image: url('/images/placeholders/services-hero.jpg');"
+    ></div>
+
+    <div class="container-custom relative z-20 text-white text-center">
+      <h1 class="font-heading font-bold mb-6">Our Services</h1>
+      <p class="text-xl max-w-3xl mx-auto">
+        From concept to completion, we offer comprehensive home renovation services
+        to transform your space and exceed your expectations.
+      </p>
+    </div>
+  </section>
+
+  <!-- Services Grid -->
+  <section class="section-padding bg-white">
+    <div class="container-custom">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {sortedServices.map((service) => (
+          <ServiceCard
+            title={service.data.title}
+            description={service.data.description}
+            image={service.data.image}
+            href={`/services/${service.slug}`}
+            icon={service.data.icon}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="section-padding bg-primary-600 text-white">
+    <div class="container-custom">
+      <div class="max-w-4xl mx-auto text-center">
+        <h2 class="mb-6">Not Sure Which Service You Need?</h2>
+        <p class="text-xl mb-8 opacity-90">
+          Contact us for a free consultation. We'll help you determine the best solutions for your project.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/contact" class="btn bg-white text-primary-600 hover:bg-gray-100 text-lg px-8 py-4">
+            Get Free Consultation
+          </a>
+          <a href="tel:+1234567890" class="btn btn-outline border-white text-white hover:bg-white hover:text-primary-600 text-lg px-8 py-4">
+            📞 (123) 456-7890
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</MainLayout>
