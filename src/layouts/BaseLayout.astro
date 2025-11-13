@@ -11,7 +11,7 @@ export interface Props {
 const {
   title = 'Living Stone Contractors, LLC - Home Remodeling & Improvement Specialists',
   description = 'Specialized in home remodeling and improvement, transforming spaces into functional, modern, and durable places. Technical expertise, premium materials, and reliable service that exceeds expectations.',
-  image = '/images/og-image.jpg',
+  image = '/images/og-image.png',
   canonicalURL = new URL(Astro.url.pathname, Astro.site).href,
 } = Astro.props;
 
@@ -31,6 +31,9 @@ const fullTitle = title.includes(siteTitle) ? title : `${title} | ${siteTitle}`;
     <title>{fullTitle}</title>
     <meta name="title" content={fullTitle} />
     <meta name="description" content={description} />
+    <meta name="keywords" content="home remodeling, home improvement, contractors, interior renovation, exterior renovation, kitchen remodeling, bathroom remodeling, masonry, roofing, siding, basement finishing" />
+    <meta name="author" content="Living Stone Contractors, LLC" />
+    <meta name="robots" content="index, follow" />
     <link rel="canonical" href={canonicalURL} />
 
     <!-- Open Graph / Facebook -->
@@ -58,14 +61,14 @@ const fullTitle = title.includes(siteTitle) ? title : `${title} | ${siteTitle}`;
     />
 
     <!-- Schema.org structured data -->
-    <script type="application/ld+json">
-      {
+    <script type="application/ld+json" set:html={JSON.stringify({
         "@context": "https://schema.org",
         "@type": "GeneralContractor",
         "name": "Living Stone Contractors, LLC",
         "description": "Specialized in home remodeling and improvement, transforming spaces into functional, modern, and durable places",
         "url": "https://livingstonecontractors.com",
         "logo": "https://livingstonecontractors.com/images/logo.png",
+        "image": "https://livingstonecontractors.com/images/og-image.png",
         "address": {
           "@type": "PostalAddress",
           "addressCountry": "US"
@@ -74,13 +77,38 @@ const fullTitle = title.includes(siteTitle) ? title : `${title} | ${siteTitle}`;
         "contactPoint": {
           "@type": "ContactPoint",
           "contactType": "Customer Service",
+          "telephone": "+1-123-456-7890",
+          "email": "info@livingstonecontractors.com",
           "availableLanguage": ["English", "Spanish"]
         },
         "areaServed": {
           "@type": "State",
           "name": "United States"
+        },
+        "priceRange": "$$",
+        "openingHoursSpecification": [
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+            "opens": "07:00",
+            "closes": "18:00"
+          }
+        ],
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Home Remodeling Services",
+          "itemListElement": [
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Interior Renovation" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Exterior Renovation" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Kitchen Remodeling" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Bathroom Remodeling" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Masonry Services" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Roofing Services" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Siding Installation" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Basement Finishing" } }
+          ]
         }
-      }
+      })} />
     </script>
   </head>
   <body>
