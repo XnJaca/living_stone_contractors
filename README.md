@@ -1,70 +1,136 @@
 # Living Stone Contractors - Website
 
-Sitio web profesional para Living Stone Contractors, LLC con frontend en Astro y backend en NestJS.
+Professional website for Living Stone Contractors, LLC - Home Remodeling & Improvement Specialists.
 
-## 🏗️ Arquitectura del Proyecto
+## 🏠 About Living Stone Contractors
+
+Living Stone Contractors is a company specialized in home remodeling and improvement, committed to transforming spaces into functional, modern, and durable places. We are passionate about every detail of the process, from planning to execution, ensuring high-quality results that reflect the style and needs of each client.
+
+We work hand in hand with homeowners, architects, designers, and contractors with the goal of offering comprehensive and personalized solutions. Our approach combines technical expertise, premium materials, and reliable service, guaranteeing projects that not only meet expectations but exceed them.
+
+## 🏗️ Project Architecture
 
 ### Frontend
 - **Framework**: Astro 4.x
-- **Styling**: Tailwind CSS
-- **Gestión de Contenido**: Content Collections + API REST
+- **Styling**: Tailwind CSS (with custom brand colors)
+- **Typography**: Montserrat (alternative to Gotham Pro)
+- **Content Management**: Content Collections + REST API
+- **Icons**: MDI (Material Design Icons)
 
 ### Backend
 - **Framework**: NestJS
 - **ORM**: TypeORM
-- **Base de Datos**: PostgreSQL (Neon en producción, Docker local)
-- **Autenticación**: JWT con Passport
+- **Database**: PostgreSQL (Neon in production, Docker local)
+- **Authentication**: JWT with Passport
 
-## 📁 Estructura del Proyecto
+## 📁 Project Structure
 
 ```
 living_stone_contractors/
-├── src/                        # Frontend Astro
-│   ├── components/            # Componentes reutilizables
-│   ├── layouts/               # Layouts principales
-│   ├── pages/                 # Páginas del sitio
-│   ├── content/               # Content Collections (para SSG inicial)
-│   └── styles/                # Estilos globales
-├── backend/                   # Backend NestJS
+├── src/                        # Astro Frontend
+│   ├── components/            # Reusable components
+│   │   ├── Header.astro      # Navigation with brand logo
+│   │   ├── Footer.astro      # Footer with brand logo
+│   │   └── ServiceCard.astro # Service cards
+│   ├── layouts/               # Main layouts
+│   │   ├── BaseLayout.astro  # Base HTML layout
+│   │   └── MainLayout.astro  # Main page layout
+│   ├── pages/                 # Site pages
+│   │   ├── index.astro       # Home page
+│   │   ├── about.astro       # About page
+│   │   ├── contact.astro     # Contact page
+│   │   └── services/         # Services pages
+│   ├── content/               # Content Collections
+│   │   └── services/         # Service markdown files
+│   └── styles/                # Global styles
+│       └── global.css        # Tailwind + custom styles
+├── backend/                   # NestJS Backend
 │   └── src/
-│       ├── modules/           # Módulos de la aplicación
-│       │   ├── auth/         # Autenticación
-│       │   ├── services/     # Gestión de servicios
-│       │   ├── gallery/      # Gestión de galería
-│       │   └── contact/      # Formularios de contacto
-│       ├── database/         # Entidades y migraciones
-│       │   ├── entities/    # Modelos de TypeORM
-│       │   └── seeds/       # Scripts de seed
-│       └── config/          # Configuración de la app
-├── public/                   # Archivos estáticos
-│   └── images/              # Imágenes del sitio
-└── docker-compose.yaml      # PostgreSQL para desarrollo local
+│       ├── modules/           # Application modules
+│       │   ├── auth/         # Authentication
+│       │   ├── services/     # Services management
+│       │   ├── gallery/      # Gallery management
+│       │   └── contact/      # Contact forms
+│       ├── database/         # Entities and migrations
+│       │   ├── entities/    # TypeORM models
+│       │   └── seeds/       # Seed scripts
+│       └── config/          # App configuration
+├── public/                   # Static files
+│   └── images/
+│       ├── logos/           # Brand logos (official)
+│       └── placeholders/    # Service images
+├── docs/                    # Documentation
+│   └── brand-assets/       # Brand manual and logos
+│       └── 1. Logo_LSC/   # Official brand assets
+└── docker-compose.yaml     # PostgreSQL for local dev
 ```
 
-## 🚀 Configuración e Instalación
+## 🎨 Brand Identity
 
-### Prerequisitos
+### Official Brand Colors
+
+Based on Living Stone Contractors Brand Manual:
+
+```javascript
+// Primary - Asparagus (Verde)
+primary-500: #6B8F4E
+
+// Secondary - Eerie Black (Negro verdoso)
+secondary-900: #1F2117
+
+// Accent - Coffee (Café/Marrón)
+accent: #694E3B
+
+// Neutral - Bone & Cream
+bone: #E5DDD2    // Beige/Hueso
+cream: #FCF9F3   // Baby Powder
+```
+
+### Typography
+
+**Primary Font**: Montserrat (Google Fonts)
+- Used as alternative to Gotham Pro (requires commercial license)
+- Applied to headings and body text
+- Modern, neutral, and simple aesthetic
+
+**Note**: When Gotham Pro license is obtained, update font references in:
+- `tailwind.config.mjs`
+- `src/layouts/BaseLayout.astro`
+
+### Logos
+
+Official logos are located in `public/images/logos/`:
+
+- **Header**: `LSC_secundario_Verde.png` (green, on white background)
+- **Footer**: `LSC_secundario_Blanco.png` (white, on dark background)
+- **About Section**: `LSC_sublogo_Verde.png` (full branding with icon)
+
+All logos sourced from: `docs/brand-assets/1. Logo_LSC/`
+
+## 🚀 Setup & Installation
+
+### Prerequisites
 
 - Node.js 18+
-- npm o yarn
-- Docker y Docker Compose (para desarrollo local)
+- npm or yarn
+- Docker & Docker Compose (for local development)
 
-### 1. Clonar el Repositorio
+### 1. Clone Repository
 
 ```bash
 git clone <repository-url>
 cd living_stone_contractors
 ```
 
-### 2. Configurar Variables de Entorno
+### 2. Configure Environment Variables
 
-Copia el archivo de ejemplo y configura las variables:
+Copy example file and configure:
 
 ```bash
 cp .env.example .env
 ```
 
-Edita `.env` con tus valores:
+Edit `.env` with your values:
 
 ```env
 # Database (Local Development)
@@ -73,9 +139,6 @@ DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=postgres
 DB_NAME=living_stone_db
-
-# Database (Production - Neon)
-# DATABASE_URL=postgresql://user:password@host/database?sslmode=require
 
 # Backend
 PORT=3000
@@ -93,7 +156,7 @@ ADMIN_PASSWORD=changeme
 FRONTEND_URL=http://localhost:4321
 ```
 
-### 3. Instalar Dependencias
+### 3. Install Dependencies
 
 #### Frontend
 ```bash
@@ -107,15 +170,15 @@ npm install
 cd ..
 ```
 
-### 4. Iniciar la Base de Datos (Desarrollo Local)
+### 4. Start Database (Local Development)
 
 ```bash
 docker-compose up -d
 ```
 
-Esto iniciará PostgreSQL en el puerto 5432.
+PostgreSQL will start on port 5432.
 
-### 5. Ejecutar Migraciones y Seeds
+### 5. Run Migrations & Seeds
 
 ```bash
 cd backend
@@ -123,210 +186,224 @@ npm run seed
 cd ..
 ```
 
-Esto creará:
-- Todas las tablas necesarias
-- Los 8 servicios predefinidos
-- Un usuario administrador (ver credenciales en `.env`)
+This creates:
+- All necessary tables
+- 8 predefined services
+- Admin user (credentials in `.env`)
 
-### 6. Iniciar el Proyecto
+### 6. Start Project
 
-Abre dos terminales:
+Open two terminals:
 
 **Terminal 1 - Backend:**
 ```bash
 cd backend
 npm run start:dev
 ```
-Backend corriendo en: http://localhost:3000/api
+Backend running at: http://localhost:3000/api
 
 **Terminal 2 - Frontend:**
 ```bash
 npm run dev
 ```
-Frontend corriendo en: http://localhost:4321
+Frontend running at: http://localhost:4321
 
-## 🎨 Personalización
+## 📝 Services
 
-### Imágenes
+The website features 8 core services:
 
-1. Navega a `public/images/placeholders/`
-2. Lee el archivo `README.md` para ver las especificaciones
-3. Reemplaza los placeholders con tus imágenes reales
+1. **Interior** - Interior renovation and remodeling
+2. **Exterior** - Exterior improvements and curb appeal
+3. **Additions/Alterations** - Home expansions and modifications
+4. **Masonry** - Structural and decorative stonework
+5. **Kitchens and Baths** - Complete kitchen & bathroom remodeling
+6. **Siding** - Siding installation and replacement
+7. **Basements** - Basement finishing and remodeling
+8. **Roofing** - Roof installation, repair, and replacement
 
-### Logo
+### Service Images
 
-Reemplaza el logo en:
-- `/public/images/logo.png` (200x200px)
-- Actualiza el componente Header si necesitas un tamaño diferente
+Service images are located in `public/images/placeholders/`:
+- `interior.png`
+- `exterior.png`
+- `additions.png`
+- `masonry.png`
+- `kitchens_baths.png`
+- `roofing.png`
 
-### Colores
+## 🎨 Customization
 
-Los colores están configurados en `tailwind.config.mjs`:
+### Updating Brand Colors
 
-```js
+Colors are configured in `tailwind.config.mjs`:
+
+```javascript
 colors: {
   primary: {
-    // Personaliza estos colores
-    500: '#0ea5e9',
-    600: '#0284c7',
-    // ...
+    500: '#6B8F4E',  // Asparagus - Main brand green
+    // ... other shades
+  },
+  secondary: {
+    900: '#1F2117',  // Eerie Black
+    // ... other shades
   }
 }
 ```
 
-## 🔐 Panel de Administración
+### Updating Logos
 
-### Acceso al Dashboard
+Replace logos in `public/images/logos/`:
+- Maintain PNG format with transparency
+- Use appropriate color version (green/white/black)
+- Reference official brand manual in `docs/brand-assets/`
 
-El usuario administrador se crea automáticamente con el seed. Credenciales por defecto:
+### Updating Service Images
+
+1. Navigate to `public/images/placeholders/`
+2. Replace with high-quality images (recommended: 1200x800px minimum)
+3. Maintain PNG format for best quality
+4. Use descriptive filenames matching service slugs
+
+## 🔐 Admin Panel
+
+### API Endpoints
+
+#### Services
+- `GET /api/services` - List all published services
+- `GET /api/services/:id` - Get service by ID
+- `GET /api/services/slug/:slug` - Get service by slug
+- `POST /api/services` - Create service (requires auth)
+- `PATCH /api/services/:id` - Update service (requires auth)
+- `DELETE /api/services/:id` - Delete service (requires auth)
+
+#### Gallery
+- `GET /api/gallery` - List all images
+- `GET /api/gallery?serviceId=xxx` - Filter by service
+- `POST /api/gallery` - Add image (requires auth)
+- `PATCH /api/gallery/:id` - Update image (requires auth)
+- `DELETE /api/gallery/:id` - Delete image (requires auth)
+
+#### Contact
+- `POST /api/contact` - Submit contact form
+- `GET /api/contact` - List messages (requires auth)
+- `PATCH /api/contact/:id/status` - Update status (requires auth)
+- `DELETE /api/contact/:id` - Delete message (requires auth)
+
+#### Authentication
+- `POST /api/auth/login` - Login
+- `GET /api/auth/profile` - Get profile (requires auth)
+
+### Default Admin Credentials
+
 - Email: `admin@livingstonecontractors.com`
 - Password: `changeme`
 
-**⚠️ IMPORTANTE**: Cambia estas credenciales en producción.
+**⚠️ IMPORTANT**: Change these credentials in production!
 
-### Endpoints de la API
+## 🌐 Deployment
 
-#### Servicios
-- `GET /api/services` - Listar todos los servicios publicados
-- `GET /api/services/:id` - Obtener un servicio por ID
-- `GET /api/services/slug/:slug` - Obtener un servicio por slug
-- `POST /api/services` - Crear servicio (requiere auth)
-- `PATCH /api/services/:id` - Actualizar servicio (requiere auth)
-- `DELETE /api/services/:id` - Eliminar servicio (requiere auth)
+### Frontend (Astro) - Vercel/Netlify
 
-#### Galería
-- `GET /api/gallery` - Listar todas las imágenes
-- `GET /api/gallery?serviceId=xxx` - Filtrar por servicio
-- `POST /api/gallery` - Añadir imagen (requiere auth)
-- `PATCH /api/gallery/:id` - Actualizar imagen (requiere auth)
-- `DELETE /api/gallery/:id` - Eliminar imagen (requiere auth)
-
-#### Contacto
-- `POST /api/contact` - Enviar formulario de contacto
-- `GET /api/contact` - Listar mensajes (requiere auth)
-- `PATCH /api/contact/:id/status` - Actualizar estado (requiere auth)
-- `DELETE /api/contact/:id` - Eliminar mensaje (requiere auth)
-
-#### Autenticación
-- `POST /api/auth/login` - Iniciar sesión
-- `GET /api/auth/profile` - Obtener perfil (requiere auth)
-
-### Crear un Dashboard Web
-
-Para crear un dashboard de administración, puedes:
-
-1. **Opción 1**: Crear páginas Astro protegidas en `/src/pages/admin/`
-2. **Opción 2**: Usar un framework separado (React, Vue) que consuma la API
-3. **Opción 3**: Integrar [Astro Admin](https://github.com/example) u otra solución
-
-## 🌐 Despliegue
-
-### Frontend (Astro)
-
-#### Vercel (Recomendado)
 ```bash
 npm run build
 ```
 
-Deploy en Vercel:
-1. Conecta tu repositorio de GitHub
-2. Configura el proyecto como Astro
-3. Añade las variables de entorno necesarias
-4. Deploy automático
+1. Connect GitHub repository
+2. Configure as Astro project
+3. Add environment variables
+4. Auto-deploy on push
 
-#### Netlify
-Similar a Vercel, conecta el repositorio y despliega.
+### Backend (NestJS) - Railway/Render/Fly.io
 
-### Backend (NestJS)
+1. Create new application
+2. Connect repository
+3. Configure environment variables
+4. Set build: `cd backend && npm install && npm run build`
+5. Set start: `cd backend && npm run start:prod`
 
-#### Railway / Render / Fly.io
+### Database - Neon
 
-1. Crea una aplicación nueva
-2. Conecta tu repositorio
-3. Configura las variables de entorno
-4. Set build command: `cd backend && npm install && npm run build`
-5. Set start command: `cd backend && npm run start:prod`
-
-### Base de Datos (Neon)
-
-1. Ve a [Neon](https://neon.tech)
-2. Crea un nuevo proyecto
-3. Copia la connection string
-4. Actualiza `DATABASE_URL` en tus variables de entorno de producción
-5. Ejecuta las migraciones:
+1. Create project at [Neon](https://neon.tech)
+2. Copy connection string
+3. Update `DATABASE_URL` in production env vars
+4. Run migrations:
    ```bash
    cd backend
    npm run migration:run
    npm run seed
    ```
 
-## 📝 Scripts Disponibles
+## 📝 Available Scripts
 
 ### Frontend
-- `npm run dev` - Servidor de desarrollo
-- `npm run build` - Build de producción
-- `npm run preview` - Preview del build
+- `npm run dev` - Development server
+- `npm run build` - Production build
+- `npm run preview` - Preview build
 
 ### Backend
-- `npm run start:dev` - Servidor de desarrollo con hot-reload
-- `npm run start:prod` - Servidor de producción
-- `npm run build` - Compilar TypeScript
-- `npm run seed` - Ejecutar seeds de base de datos
-- `npm run migration:generate` - Generar nueva migración
-- `npm run migration:run` - Ejecutar migraciones
+- `npm run start:dev` - Development server with hot-reload
+- `npm run start:prod` - Production server
+- `npm run build` - Compile TypeScript
+- `npm run seed` - Run database seeds
+- `npm run migration:generate` - Generate new migration
+- `npm run migration:run` - Run migrations
 
-## 🔧 Desarrollo
+## 🔧 Development
 
-### Añadir un Nuevo Servicio
+### Logo Scaling
 
-1. Usa el endpoint POST `/api/services` o añade directamente en el seed
-2. Sube la imagen del servicio
-3. El servicio aparecerá automáticamente en el sitio
+Logos use CSS `transform: scale()` for size without affecting layout:
 
-### Modificar Servicios Existentes
+**Header**:
+```css
+h-20 md:h-24 lg:h-28 scale-125 md:scale-150
+```
 
-1. Usa el endpoint PATCH `/api/services/:id`
-2. Los cambios se reflejarán inmediatamente
+**Footer**:
+```css
+h-20 scale-[2] origin-center md:origin-left
+```
 
-### Gestionar Galería de Imágenes
+### Adding New Services
 
-Usa los endpoints de `/api/gallery` para:
-- Añadir imágenes a servicios específicos
-- Organizar orden de visualización
-- Mostrar/ocultar imágenes
+1. Use POST `/api/services` endpoint or add to seed
+2. Upload service image
+3. Service appears automatically on site
 
 ## 🐛 Troubleshooting
 
-### La base de datos no se conecta
+### Database Connection Issues
 
-1. Verifica que Docker esté corriendo: `docker ps`
-2. Revisa las credenciales en `.env`
-3. Reinicia los contenedores: `docker-compose restart`
+1. Verify Docker is running: `docker ps`
+2. Check credentials in `.env`
+3. Restart containers: `docker-compose restart`
 
-### Error en migraciones
+### Migration Errors
 
 ```bash
-# Elimina la base de datos y vuelve a crearla
+# Drop database and recreate
 docker-compose down -v
 docker-compose up -d
 cd backend && npm run seed
 ```
 
-### Puerto en uso
+### Port Already in Use
 
-Cambia el puerto en `.env`:
+Change port in `.env`:
 ```env
-PORT=3001  # o cualquier otro puerto disponible
+PORT=3001  # or any available port
 ```
 
-## 📞 Soporte
+## 📞 Contact
 
-Para preguntas o problemas, contacta al equipo de desarrollo.
+For questions or issues, contact the development team.
 
-## 📄 Licencia
+## 📄 License
 
-Proyecto propietario de Living Stone Contractors, LLC.
+Proprietary project of Living Stone Contractors, LLC.
 
 ---
 
-**Desarrollado con ❤️ usando Astro + NestJS**
+**Built with ❤️ using Astro + NestJS**
+
+**Brand Identity**: Living Stone Contractors Brand Manual 2024

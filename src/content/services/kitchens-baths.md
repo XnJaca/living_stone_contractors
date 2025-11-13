@@ -1,7 +1,7 @@
 ---
 title: "Kitchens and Baths"
 description: "Create the kitchen and bathroom of your dreams with our complete remodeling services. From design to completion."
-image: "/images/placeholders/kitchen-bath.jpg"
+image: "/images/placeholders/kitchens_baths.png"
 icon: "mdi:countertop-outline"
 featured: true
 order: 5

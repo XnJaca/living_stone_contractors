@@ -1,7 +1,7 @@
 ---
 title: "Interior"
 description: "Transform your home's interior with our expert renovation services. From concept to completion, we bring your vision to life."
-image: "/images/placeholders/interior.jpg"
+image: "/images/placeholders/interior.png"
 icon: "mdi:home-interior"
 featured: true
 order: 1

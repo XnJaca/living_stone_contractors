@@ -1,7 +1,7 @@
 ---
 title: "Basements"
 description: "Unlock your home's potential with professional basement finishing and remodeling. Create the extra space you need."
-image: "/images/placeholders/basement.jpg"
+image: "/images/placeholders/interior.png"
 icon: "mdi:stairs-down"
 featured: false
 order: 7

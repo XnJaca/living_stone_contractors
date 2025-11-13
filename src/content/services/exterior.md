@@ -1,7 +1,7 @@
 ---
 title: "Exterior"
 description: "Enhance your home's curb appeal and protection with our professional exterior renovation services."
-image: "/images/placeholders/exterior.jpg"
+image: "/images/placeholders/exterior.png"
 icon: "mdi:home-outline"
 featured: true
 order: 2

@@ -11,16 +11,14 @@ const navItems = [
 
 <header class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
   <nav class="container-custom">
-    <div class="flex items-center justify-between h-20">
+    <div class="flex items-center justify-between py-2 md:py-3">
       <!-- Logo -->
-      <a href="/" class="flex items-center space-x-3">
-        <div class="w-12 h-12 bg-primary-600 rounded-lg flex items-center justify-center">
-          <span class="text-white font-bold text-xl">LS</span>
-        </div>
-        <div class="hidden md:flex flex-col">
-          <span class="font-heading font-bold text-lg leading-tight text-gray-900">Living Stone</span>
-          <span class="text-xs text-gray-600 leading-tight">Contractors, LLC</span>
-        </div>
+      <a href="/" class="flex items-center">
+        <img
+          src="/images/logos/LSC_secundario_Verde.png"
+          alt="Living Stone Contractors"
+          class="h-20 md:h-24 lg:h-28 w-auto scale-125 md:scale-150"
+        />
       </a>
 
       <!-- Desktop Navigation -->
@@ -99,7 +97,7 @@ const navItems = [
 </header>
 
 <!-- Spacer to prevent content from going under fixed header -->
-<div class="h-20"></div>
+<div class="h-20 md:h-24"></div>
 
 <script>
   // Mobile menu toggle

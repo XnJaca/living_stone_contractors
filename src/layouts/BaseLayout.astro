@@ -9,8 +9,8 @@ export interface Props {
 }
 
 const {
-  title = 'Living Stone Contractors, LLC - Expert Home Renovation Services',
-  description = 'Living Stone Contractors offers professional interior, exterior, roofing, masonry, kitchen, bath, basement, and siding services. Quality craftsmanship and customer satisfaction guaranteed.',
+  title = 'Living Stone Contractors, LLC - Home Remodeling & Improvement Specialists',
+  description = 'Specialized in home remodeling and improvement, transforming spaces into functional, modern, and durable places. Technical expertise, premium materials, and reliable service that exceeds expectations.',
   image = '/images/og-image.jpg',
   canonicalURL = new URL(Astro.url.pathname, Astro.site).href,
 } = Astro.props;
@@ -48,10 +48,12 @@ const fullTitle = title.includes(siteTitle) ? title : `${title} | ${siteTitle}`;
     <meta property="twitter:image" content={new URL(image, Astro.site)} />
 
     <!-- Fonts -->
+    <!-- Usando Montserrat como alternativa a Gotham Pro (fuente comercial) -->
+    <!-- TODO: Reemplazar con Gotham Pro cuando se obtenga la licencia -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
 
@@ -61,7 +63,7 @@ const fullTitle = title.includes(siteTitle) ? title : `${title} | ${siteTitle}`;
         "@context": "https://schema.org",
         "@type": "GeneralContractor",
         "name": "Living Stone Contractors, LLC",
-        "description": "Professional home renovation and construction services",
+        "description": "Specialized in home remodeling and improvement, transforming spaces into functional, modern, and durable places",
         "url": "https://livingstonecontractors.com",
         "logo": "https://livingstonecontractors.com/images/logo.png",
         "address": {

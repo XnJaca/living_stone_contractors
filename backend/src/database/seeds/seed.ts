@@ -141,13 +141,13 @@ async function seed() {
     await dataSource.initialize();
     console.log('🔌 Database connected');
 
+    // Drop and recreate schema
+    console.log('🗑️  Dropping and recreating schema...');
+    await dataSource.synchronize(true);
+    console.log('✓ Schema recreated');
+
     const serviceRepository = dataSource.getRepository(Service);
     const userRepository = dataSource.getRepository(User);
-
-    // Clear existing data
-    console.log('🗑️  Clearing existing data...');
-    await serviceRepository.delete({});
-    await userRepository.delete({});
 
     // Seed services
     console.log('🌱 Seeding services...');

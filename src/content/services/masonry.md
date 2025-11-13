@@ -1,7 +1,7 @@
 ---
 title: "Masonry"
 description: "Expert masonry services for both structural and decorative stonework. Quality craftsmanship that stands the test of time."
-image: "/images/placeholders/masonry.jpg"
+image: "/images/placeholders/masonry.png"
 icon: "mdi:wall"
 featured: true
 order: 4

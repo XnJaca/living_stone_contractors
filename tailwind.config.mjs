@@ -4,34 +4,46 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Colores de marca Living Stone Contractors
         primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+          // Asparagus - Verde principal
+          50: '#f4f7f1',
+          100: '#e6ede0',
+          200: '#cfdcc4',
+          300: '#b0c79d',
+          400: '#8faf75',
+          500: '#6B8F4E', // Color principal de marca
+          600: '#5a7841',
+          700: '#475f34',
+          800: '#3a4d2c',
+          900: '#304026',
         },
         secondary: {
-          50: '#fafaf9',
-          100: '#f5f5f4',
-          200: '#e7e5e4',
-          300: '#d6d3d1',
-          400: '#a8a29e',
-          500: '#78716c',
-          600: '#57534e',
-          700: '#44403c',
-          800: '#292524',
-          900: '#1c1917',
-        }
+          // Eerie Black - Negro verdoso
+          50: '#f6f6f5',
+          100: '#e8e8e7',
+          200: '#d1d2cf',
+          300: '#b0b1ad',
+          400: '#888a84',
+          500: '#6b6d67',
+          600: '#565853',
+          700: '#484a45',
+          800: '#3d3f3a',
+          900: '#1F2117', // Color secundario de marca
+        },
+        accent: {
+          // Coffee - Café/Marrón
+          DEFAULT: '#694E3B',
+          light: '#8b6f5c',
+          dark: '#4d3829',
+        },
+        bone: '#E5DDD2', // Beige/Hueso
+        cream: '#FCF9F3', // Baby Powder - Blanco crema
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        heading: ['Poppins', 'system-ui', 'sans-serif']
+        // Usando Montserrat como alternativa a Gotham Pro (requiere licencia)
+        sans: ['Montserrat', 'system-ui', 'sans-serif'],
+        heading: ['Montserrat', 'system-ui', 'sans-serif']
       }
     },
   },

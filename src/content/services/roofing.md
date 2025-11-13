@@ -1,7 +1,7 @@
 ---
 title: "Roofing"
 description: "Protect your home with professional roofing services. Installation, repair, and replacement by experienced craftsmen."
-image: "/images/placeholders/roofing.jpg"
+image: "/images/placeholders/roofing.png"
 icon: "mdi:home-roof"
 featured: true
 order: 8
