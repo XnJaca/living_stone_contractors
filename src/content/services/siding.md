@@ -1,7 +1,7 @@
 ---
 title: "Siding"
 description: "Protect and beautify your home with quality siding installation. Energy-efficient options with lasting durability."
-image: "/images/placeholders/exterior.png"
+image: "/images/placeholders/exterior.jpeg"
 icon: "mdi:texture-box"
 featured: false
 order: 6

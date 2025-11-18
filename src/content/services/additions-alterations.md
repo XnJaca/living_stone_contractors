@@ -1,7 +1,7 @@
 ---
 title: "Additions/Alterations"
 description: "Expand your living space with custom home additions and alterations designed to seamlessly blend with your existing structure."
-image: "/images/placeholders/additions.png"
+image: "/images/placeholders/addition.jpeg"
 icon: "mdi:home-plus-outline"
 featured: true
 order: 3

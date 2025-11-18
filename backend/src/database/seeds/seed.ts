@@ -53,7 +53,7 @@ Protect and beautify your home with our comprehensive exterior renovation servic
 
 Need more space? Our custom additions and alterations seamlessly integrate with your existing home, adding value and functionality.`,
     icon: 'mdi:home-plus-outline',
-    image: '/images/placeholders/additions.jpg',
+    image: '/images/placeholders/addition.jpeg',
     featured: true,
     order: 3,
     published: true,
