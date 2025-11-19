@@ -7,6 +7,7 @@ import { existsSync, mkdirSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
 import pool from './db/config.js';
+import { v2 as cloudinary } from 'cloudinary';
 
 const __dirname_root = fileURLToPath(new URL('..', import.meta.url));
 dotenv.config({ path: join(__dirname_root, '.env.local') });
@@ -18,10 +19,42 @@ const PORT = process.env.PORT || 3001;
 // Admin password from env
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 
+// Cloudinary configuration
+const CLOUDINARY_ENABLED = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
+
+if (CLOUDINARY_ENABLED) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+  console.log('☁️ Cloudinary storage enabled');
+} else {
+  console.log('📁 Using local file storage');
+}
+
+// Function to upload file to Cloudinary
+async function uploadToCloudinary(file) {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'living-stone',
+        resource_type: 'image',
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result.secure_url);
+      }
+    );
+
+    uploadStream.end(file.buffer);
+  });
+}
+
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Setup storage for uploaded files
 const uploadDir = join(__dirname, '..', 'public', 'uploads');
@@ -29,17 +62,31 @@ if (!existsSync(uploadDir)) {
   mkdirSync(uploadDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const ext = file.originalname.split('.').pop();
-    cb(null, `${uuidv4()}.${ext}`);
-  }
-});
+// Use memory storage when Cloudinary is enabled, disk storage otherwise
+const storage = CLOUDINARY_ENABLED
+  ? multer.memoryStorage()
+  : multer.diskStorage({
+      destination: (req, file, cb) => {
+        cb(null, uploadDir);
+      },
+      filename: (req, file, cb) => {
+        const ext = file.originalname.split('.').pop();
+        cb(null, `${uuidv4()}.${ext}`);
+      }
+    });
 
-const upload = multer({ storage });
+const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB limit
+
+// Helper function to get image URL from uploaded file
+async function getImageUrl(file) {
+  if (!file) return null;
+
+  if (CLOUDINARY_ENABLED) {
+    return await uploadToCloudinary(file);
+  } else {
+    return `/uploads/${file.filename}`;
+  }
+}
 
 // Auth middleware
 const checkAuth = (req, res, next) => {
@@ -104,7 +151,7 @@ app.put('/api/pages/:page', checkAuth, upload.single('heroImage'), async (req, r
       aboutDescription
     } = req.body;
 
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : heroImage;
+    const imageUrl = req.file ? await getImageUrl(req.file) : heroImage;
 
     const result = await pool.query(
       `UPDATE pages
@@ -214,7 +261,7 @@ app.post('/api/services', checkAuth, upload.single('image'), async (req, res) =>
     } = req.body;
 
     const serviceId = uuidv4();
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : image;
+    const imageUrl = req.file ? await getImageUrl(req.file) : image;
 
     const result = await pool.query(
       `INSERT INTO services (id, title, slug, description, content, image, icon, featured, "order", meta_title, meta_description)
@@ -262,7 +309,7 @@ app.put('/api/services/:id', checkAuth, upload.single('image'), async (req, res)
       metaDescription
     } = req.body;
 
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : image;
+    const imageUrl = req.file ? await getImageUrl(req.file) : image;
 
     const result = await pool.query(
       `UPDATE services
@@ -381,7 +428,7 @@ app.post('/api/testimonials', checkAuth, upload.single('image'), async (req, res
   try {
     const { name, company, content, rating, image, featured } = req.body;
     const testimonialId = uuidv4();
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : image;
+    const imageUrl = req.file ? await getImageUrl(req.file) : image;
 
     const result = await pool.query(
       `INSERT INTO testimonials (id, name, company, content, rating, image, featured)
