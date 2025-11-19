@@ -530,38 +530,18 @@ app.get('/api/health', (req, res) => {
 // Serve static files from public directory (for uploads, etc.)
 app.use(express.static(join(__dirname, '..', 'public')));
 
-// In production, serve the built Astro frontend
+// In production, serve the built Astro frontend using SSR
 if (process.env.NODE_ENV === 'production') {
   const distPath = join(__dirname, '..', 'dist');
 
-  // Serve static files from dist
-  app.use(express.static(distPath));
+  // Serve static assets from client directory
+  app.use(express.static(join(distPath, 'client')));
 
-  // Handle all other routes by serving the appropriate HTML file
-  app.get('*', (req, res) => {
-    // Don't serve HTML for API routes
-    if (req.path.startsWith('/api/')) {
-      return res.status(404).json({ error: 'Not found' });
-    }
-
-    // Try to serve the exact path as HTML file
-    const htmlPath = join(distPath, req.path, 'index.html');
-    const exactPath = join(distPath, req.path + '.html');
-    const fs = require('fs');
-
-    if (fs.existsSync(htmlPath)) {
-      res.sendFile(htmlPath);
-    } else if (fs.existsSync(exactPath)) {
-      res.sendFile(exactPath);
-    } else {
-      // Fallback to 404 page or index
-      const notFoundPath = join(distPath, '404.html');
-      if (fs.existsSync(notFoundPath)) {
-        res.status(404).sendFile(notFoundPath);
-      } else {
-        res.sendFile(join(distPath, 'index.html'));
-      }
-    }
+  // Import and use Astro SSR handler
+  import(join(distPath, 'server', 'entry.mjs')).then(({ handler }) => {
+    app.use(handler);
+  }).catch(err => {
+    console.error('Failed to load Astro handler:', err);
   });
 }
 
