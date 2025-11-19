@@ -8,7 +8,8 @@ import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
 import pool from './db/config.js';
 
-dotenv.config({ path: '.env.local' });
+const __dirname_root = fileURLToPath(new URL('..', import.meta.url));
+dotenv.config({ path: join(__dirname_root, '.env.local') });
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const app = express();
@@ -49,6 +50,18 @@ const checkAuth = (req, res, next) => {
   next();
 };
 
+// ============ AUTH ENDPOINTS ============
+
+// Validate login
+app.post('/api/auth/login', (req, res) => {
+  const password = req.headers['x-admin-password'];
+  if (password === ADMIN_PASSWORD) {
+    res.json({ success: true });
+  } else {
+    res.status(401).json({ error: 'Invalid password' });
+  }
+});
+
 // ============ PAGE CONTENT ENDPOINTS ============
 
 // Get all page content
@@ -74,7 +87,7 @@ app.get('/api/pages', async (req, res) => {
 });
 
 // Update page content
-app.put('/api/pages/:page', checkAuth, async (req, res) => {
+app.put('/api/pages/:page', checkAuth, upload.single('heroImage'), async (req, res) => {
   try {
     const { page } = req.params;
 
@@ -91,6 +104,8 @@ app.put('/api/pages/:page', checkAuth, async (req, res) => {
       aboutDescription
     } = req.body;
 
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : heroImage;
+
     const result = await pool.query(
       `UPDATE pages
        SET hero_title = $1, hero_subtitle = $2, hero_description = $3,
@@ -98,7 +113,7 @@ app.put('/api/pages/:page', checkAuth, async (req, res) => {
            updated_at = CURRENT_TIMESTAMP
        WHERE slug = $7
        RETURNING *`,
-      [heroTitle, heroSubtitle, heroDescription, heroImage, aboutTitle, aboutDescription, 'home']
+      [heroTitle, heroSubtitle, heroDescription, imageUrl, aboutTitle, aboutDescription, 'home']
     );
 
     res.json({
@@ -331,17 +346,48 @@ app.get('/api/testimonials', async (req, res) => {
   }
 });
 
+// Get single testimonial
+app.get('/api/testimonials/:id', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM testimonials WHERE id = $1',
+      [req.params.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Testimonial not found' });
+    }
+
+    const row = result.rows[0];
+    res.json({
+      id: row.id,
+      name: row.name,
+      company: row.company,
+      content: row.content,
+      rating: row.rating,
+      image: row.image,
+      featured: row.featured,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    });
+  } catch (error) {
+    console.error('Error fetching testimonial:', error);
+    res.status(500).json({ error: 'Failed to fetch testimonial' });
+  }
+});
+
 // Create testimonial
-app.post('/api/testimonials', checkAuth, async (req, res) => {
+app.post('/api/testimonials', checkAuth, upload.single('image'), async (req, res) => {
   try {
     const { name, company, content, rating, image, featured } = req.body;
     const testimonialId = uuidv4();
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : image;
 
     const result = await pool.query(
       `INSERT INTO testimonials (id, name, company, content, rating, image, featured)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
-      [testimonialId, name, company, content, parseInt(rating) || 5, image, featured === 'true']
+      [testimonialId, name, company, content, parseInt(rating) || 5, imageUrl, featured === 'true']
     );
 
     const row = result.rows[0];
@@ -366,15 +412,15 @@ app.post('/api/testimonials', checkAuth, async (req, res) => {
 // Update testimonial
 app.put('/api/testimonials/:id', checkAuth, async (req, res) => {
   try {
-    const { name, company, content, rating, image, featured } = req.body;
+    const { name, company, content, rating, featured } = req.body;
 
     const result = await pool.query(
       `UPDATE testimonials
-       SET name = $1, company = $2, content = $3, rating = $4, image = $5, featured = $6,
+       SET name = $1, company = $2, content = $3, rating = $4, featured = $5,
            updated_at = CURRENT_TIMESTAMP
-       WHERE id = $7
+       WHERE id = $6
        RETURNING *`,
-      [name, company, content, parseInt(rating) || 5, image, featured === 'true', req.params.id]
+      [name, company, content, parseInt(rating) || 5, featured === 'true', req.params.id]
     );
 
     if (result.rows.length === 0) {
@@ -481,11 +527,49 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Serve static files from public directory
+// Serve static files from public directory (for uploads, etc.)
 app.use(express.static(join(__dirname, '..', 'public')));
+
+// In production, serve the built Astro frontend
+if (process.env.NODE_ENV === 'production') {
+  const distPath = join(__dirname, '..', 'dist');
+
+  // Serve static files from dist
+  app.use(express.static(distPath));
+
+  // Handle all other routes by serving the appropriate HTML file
+  app.get('*', (req, res) => {
+    // Don't serve HTML for API routes
+    if (req.path.startsWith('/api/')) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    // Try to serve the exact path as HTML file
+    const htmlPath = join(distPath, req.path, 'index.html');
+    const exactPath = join(distPath, req.path + '.html');
+    const fs = require('fs');
+
+    if (fs.existsSync(htmlPath)) {
+      res.sendFile(htmlPath);
+    } else if (fs.existsSync(exactPath)) {
+      res.sendFile(exactPath);
+    } else {
+      // Fallback to 404 page or index
+      const notFoundPath = join(distPath, '404.html');
+      if (fs.existsSync(notFoundPath)) {
+        res.status(404).sendFile(notFoundPath);
+      } else {
+        res.sendFile(join(distPath, 'index.html'));
+      }
+    }
+  });
+}
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`✅ Admin API running on http://localhost:${PORT}`);
+  console.log(`✅ Server running on http://localhost:${PORT}`);
+  if (process.env.NODE_ENV === 'production') {
+    console.log(`🌐 Serving frontend from dist/`);
+  }
   console.log(`📊 Admin Panel: http://localhost:${PORT}/admin/`);
 });

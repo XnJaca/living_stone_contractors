@@ -1,5 +1,26 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
+
+// API URL
+const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001';
+
+// Default contact info
+let contactInfo = {
+  email: 'lstonecontractors@gmail.com',
+  phone: '(202) 373-8568',
+  address: 'Germantown, MD 20874',
+  hours: 'Monday to Friday: 8:00 AM - 5:00 PM\nSaturday - Sunday: Closed'
+};
+
+try {
+  const res = await fetch(`${API_URL}/api/contact`);
+  if (res.ok) {
+    const data = await res.json();
+    contactInfo = { ...contactInfo, ...data };
+  }
+} catch (error) {
+  console.error('Error fetching contact info:', error);
+}
 ---
 
 <MainLayout
@@ -142,8 +163,8 @@ import MainLayout from '../layouts/MainLayout.astro';
               </div>
               <div>
                 <h4 class="font-semibold text-gray-900 mb-1">Phone</h4>
-                <a href="tel:+12023738568" class="text-primary-600 hover:text-primary-700">
-                  (202) 373-8568
+                <a href={`tel:${contactInfo.phone?.replace(/[^0-9+]/g, '')}`} class="text-primary-600 hover:text-primary-700">
+                  {contactInfo.phone}
                 </a>
               </div>
             </div>
@@ -156,8 +177,8 @@ import MainLayout from '../layouts/MainLayout.astro';
               </div>
               <div>
                 <h4 class="font-semibold text-gray-900 mb-1">Email</h4>
-                <a href="mailto:lstonecontractors@gmail.com" class="text-primary-600 hover:text-primary-700 break-all">
-                  lstonecontractors@gmail.com
+                <a href={`mailto:${contactInfo.email}`} class="text-primary-600 hover:text-primary-700 break-all">
+                  {contactInfo.email}
                 </a>
               </div>
             </div>
@@ -170,8 +191,9 @@ import MainLayout from '../layouts/MainLayout.astro';
               </div>
               <div>
                 <h4 class="font-semibold text-gray-900 mb-1">Business Hours</h4>
-                <p class="text-gray-600">Monday to Friday: 8:00 AM - 5:00 PM</p>
-                <p class="text-gray-600">Saturday - Sunday: Closed</p>
+                {contactInfo.hours?.split('\n').map((line: string) => (
+                  <p class="text-gray-600">{line}</p>
+                ))}
               </div>
             </div>
 
@@ -184,7 +206,7 @@ import MainLayout from '../layouts/MainLayout.astro';
               </div>
               <div>
                 <h4 class="font-semibold text-gray-900 mb-1">Address</h4>
-                <p class="text-gray-600">Germantown, MD 20874</p>
+                <p class="text-gray-600">{contactInfo.address}</p>
                 <p class="text-sm text-gray-500 mt-1">Serving the DMV area</p>
               </div>
             </div>
