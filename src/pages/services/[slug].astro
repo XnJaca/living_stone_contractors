@@ -45,23 +45,6 @@ if (!service) {
 
 // Parse Markdown content to HTML
 const contentHtml = service.content ? await marked(service.content) : '';
-
-// Generate static paths from API
-export async function getStaticPaths() {
-  const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001';
-  try {
-    const res = await fetch(`${API_URL}/api/services`);
-    if (res.ok) {
-      const services = await res.json();
-      return services.map((service: any) => ({
-        params: { slug: service.slug },
-      }));
-    }
-  } catch (error) {
-    console.error('Error fetching services for paths:', error);
-  }
-  return [];
-}
 ---
 
 <MainLayout
