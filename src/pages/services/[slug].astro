@@ -1,46 +1,86 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { marked } from 'marked';
 
+// API URL
+const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001';
+
+// Get slug from URL
+const { slug } = Astro.params;
+
+let service: any = null;
+let otherServices: any[] = [];
+let contactInfo: any = {
+  phone: '(202) 373-8568',
+  email: 'lstonecontractors@gmail.com'
+};
+
+try {
+  // Fetch all services and contact info in parallel
+  const [servicesRes, contactRes] = await Promise.all([
+    fetch(`${API_URL}/api/services`),
+    fetch(`${API_URL}/api/contact`)
+  ]);
+
+  if (servicesRes.ok) {
+    const services = await servicesRes.json();
+    service = services.find((s: any) => s.slug === slug);
+    otherServices = services
+      .filter((s: any) => s.slug !== slug)
+      .sort((a: any, b: any) => a.order - b.order)
+      .slice(0, 3);
+  }
+
+  if (contactRes.ok) {
+    contactInfo = await contactRes.json();
+  }
+} catch (error) {
+  console.error('Error fetching data:', error);
+}
+
+// Redirect to 404 if service not found
+if (!service) {
+  return Astro.redirect('/404');
+}
+
+// Parse Markdown content to HTML
+const contentHtml = service.content ? await marked(service.content) : '';
+
+// Generate static paths from API
 export async function getStaticPaths() {
-  const services = await getCollection('services');
-  return services.map((service) => ({
-    params: { slug: service.slug },
-    props: { service },
-  }));
+  const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001';
+  try {
+    const res = await fetch(`${API_URL}/api/services`);
+    if (res.ok) {
+      const services = await res.json();
+      return services.map((service: any) => ({
+        params: { slug: service.slug },
+      }));
+    }
+  } catch (error) {
+    console.error('Error fetching services for paths:', error);
+  }
+  return [];
 }
-
-interface Props {
-  service: CollectionEntry<'services'>;
-}
-
-const { service } = Astro.props;
-const { Content } = await service.render();
-
-const allServices = await getCollection('services');
-const otherServices = allServices
-  .filter(s => s.slug !== service.slug)
-  .sort((a, b) => a.data.order - b.data.order)
-  .slice(0, 3);
 ---
 
 <MainLayout
-  title={service.data.metaTitle || `${service.data.title} Services | Living Stone Contractors`}
-  description={service.data.metaDescription || service.data.description}
-  image={service.data.image}
+  title={service.metaTitle || `${service.title} Services | Living Stone Contractors`}
+  description={service.metaDescription || service.description}
+  image={service.image}
 >
   <!-- Hero Section -->
   <section class="relative py-24 bg-gray-900">
     <div class="absolute inset-0 bg-gradient-to-r from-black/70 to-black/50 z-10"></div>
     <div
       class="absolute inset-0 bg-cover bg-center"
-      style={`background-image: url('${service.data.image}');`}
+      style={`background-image: url('${service.image}');`}
     ></div>
 
     <div class="container-custom relative z-20 text-white">
       <div class="max-w-3xl">
-        <h1 class="font-heading font-bold mb-6">{service.data.title}</h1>
-        <p class="text-xl">{service.data.description}</p>
+        <h1 class="font-heading font-bold mb-6">{service.title}</h1>
+        <p class="text-xl">{service.description}</p>
       </div>
     </div>
   </section>
@@ -51,8 +91,7 @@ const otherServices = allServices
       <div class="grid lg:grid-cols-3 gap-12">
         <!-- Main Content -->
         <div class="lg:col-span-2">
-          <article class="prose prose-lg max-w-none">
-            <Content />
+          <article class="prose prose-lg max-w-none" set:html={contentHtml}>
           </article>
         </div>
 
@@ -62,12 +101,12 @@ const otherServices = allServices
           <div class="card p-8 sticky top-24">
             <h3 class="font-heading font-bold text-2xl mb-4">Get Started Today</h3>
             <p class="text-gray-600 mb-6">
-              Ready to begin your {service.data.title.toLowerCase()} project? Contact us for a free estimate.
+              Ready to begin your {service.title.toLowerCase()} project? Contact us for a free estimate.
             </p>
 
             <div class="space-y-4 mb-6">
               <a
-                href="tel:+1234567890"
+                href={`tel:${contactInfo.phone?.replace(/[^0-9+]/g, '')}`}
                 class="flex items-center gap-3 text-gray-700 hover:text-primary-600 transition-colors"
               >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,12 +114,12 @@ const otherServices = allServices
                 </svg>
                 <div>
                   <p class="text-sm text-gray-500">Call Us</p>
-                  <p class="font-semibold">(202) 373-8568</p>
+                  <p class="font-semibold">{contactInfo.phone}</p>
                 </div>
               </a>
 
               <a
-                href="mailto:lstonecontractors@gmail.com"
+                href={`mailto:${contactInfo.email}`}
                 class="flex items-center gap-3 text-gray-700 hover:text-primary-600 transition-colors"
               >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,7 +127,7 @@ const otherServices = allServices
                 </svg>
                 <div>
                   <p class="text-sm text-gray-500">Email Us</p>
-                  <p class="font-semibold break-all">lstonecontractors@gmail.com</p>
+                  <p class="font-semibold break-all">{contactInfo.email}</p>
                 </div>
               </a>
             </div>
@@ -108,25 +147,25 @@ const otherServices = allServices
       <div class="container-custom">
         <h2 class="text-3xl font-heading font-bold mb-8 text-center">Other Services</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {otherServices.map((otherService) => (
+          {otherServices.map((otherService: any) => (
             <a
               href={`/services/${otherService.slug}`}
               class="card overflow-hidden group block"
             >
               <div class="relative h-48 overflow-hidden bg-gray-200">
                 <img
-                  src={otherService.data.image}
-                  alt={otherService.data.title}
+                  src={otherService.image}
+                  alt={otherService.title}
                   class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   loading="lazy"
                 />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div class="absolute bottom-4 left-4">
-                  <h3 class="text-white font-heading font-bold text-xl">{otherService.data.title}</h3>
+                  <h3 class="text-white font-heading font-bold text-xl">{otherService.title}</h3>
                 </div>
               </div>
               <div class="p-6">
-                <p class="text-gray-600 line-clamp-2">{otherService.data.description}</p>
+                <p class="text-gray-600 line-clamp-2">{otherService.description}</p>
               </div>
             </a>
           ))}

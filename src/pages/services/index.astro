@@ -1,10 +1,21 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
 import ServiceCard from '../../components/ServiceCard.astro';
-import { getCollection } from 'astro:content';
 
-const allServices = await getCollection('services');
-const sortedServices = allServices.sort((a, b) => a.data.order - b.data.order);
+// API URL
+const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001';
+
+let sortedServices: any[] = [];
+
+try {
+  const res = await fetch(`${API_URL}/api/services`);
+  if (res.ok) {
+    const services = await res.json();
+    sortedServices = services.sort((a: any, b: any) => a.order - b.order);
+  }
+} catch (error) {
+  console.error('Error fetching services:', error);
+}
 ---
 
 <MainLayout
@@ -32,13 +43,13 @@ const sortedServices = allServices.sort((a, b) => a.data.order - b.data.order);
   <section class="section-padding bg-white">
     <div class="container-custom">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {sortedServices.map((service) => (
+        {sortedServices.map((service: any) => (
           <ServiceCard
-            title={service.data.title}
-            description={service.data.description}
-            image={service.data.image}
+            title={service.title}
+            description={service.description}
+            image={service.image}
             href={`/services/${service.slug}`}
-            icon={service.data.icon}
+            icon={service.icon}
           />
         ))}
       </div>
@@ -57,7 +68,7 @@ const sortedServices = allServices.sort((a, b) => a.data.order - b.data.order);
           <a href="/contact" class="btn bg-white text-primary-600 hover:bg-gray-100 text-lg px-8 py-4">
             Get Free Consultation
           </a>
-          <a href="tel:+1234567890" class="btn btn-outline border-white text-white hover:bg-white hover:text-primary-600 text-lg px-8 py-4">
+          <a href="tel:+12023738568" class="btn btn-outline border-white text-white hover:bg-white hover:text-primary-600 text-lg px-8 py-4">
             📞 (202) 373-8568
           </a>
         </div>

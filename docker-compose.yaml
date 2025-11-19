@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   db:
     image: postgres:17
@@ -5,18 +7,17 @@ services:
     ports:
       - "5434:5432"
     environment:
-      POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-      POSTGRES_DB: ${DB_NAME:-living_stone_db}
+      POSTGRES_DB: ${DB_NAME:-living_stone}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --auth-local=scram-sha-256
     container_name: living_stone_db
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
-
-volumes:
-  postgres_data:
-    driver: local
+    volumes:
+      - ./server/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./server/db/init.sh:/docker-entrypoint-initdb.d/00-init.sh
+      - ./postgres:/var/lib/postgresql/data

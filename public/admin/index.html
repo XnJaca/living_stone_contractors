@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Living Stone - Admin Panel</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    :root {
+      --primary-green: #2D5A27;
+      --primary-green-light: #3d7a35;
+      --primary-green-dark: #1e3d1a;
+      --accent-gold: #C4A962;
+      --accent-gold-light: #d4bc7a;
+      --text-dark: #1a1a1a;
+      --text-gray: #666;
+      --bg-light: #f8f9fa;
+    }
+
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-container::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(196, 169, 98, 0.1) 0%, transparent 50%);
+      animation: rotate 30s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .login-box {
+      background: white;
+      padding: 50px 40px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-logo {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .login-logo img {
+      max-width: 200px;
+      height: auto;
+    }
+
+    .login-box h1 {
+      margin-bottom: 10px;
+      text-align: center;
+      color: var(--primary-green);
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .login-subtitle {
+      text-align: center;
+      color: var(--text-gray);
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary-green);
+      box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.1);
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: var(--primary-green);
+      color: white;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-green-light);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(45, 90, 39, 0.3);
+    }
+
+    .btn-secondary {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background: #d0d0d0;
+    }
+
+    .btn-danger {
+      background: #f44336;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #d32f2f;
+    }
+
+    .btn-success {
+      background: var(--primary-green);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: var(--primary-green-light);
+    }
+
+    /* Admin Layout */
+    .admin-container {
+      display: none;
+      min-height: 100vh;
+      background: var(--bg-light);
+    }
+
+    .admin-header {
+      background: var(--primary-green);
+      padding: 15px 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+
+    .admin-header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .admin-header-logo {
+      height: 40px;
+      width: auto;
+    }
+
+    .admin-header h1 {
+      font-size: 18px;
+      color: white;
+      font-weight: 600;
+    }
+
+    .admin-header .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .admin-header .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .admin-sidebar {
+      position: fixed;
+      left: 0;
+      top: 70px;
+      width: 260px;
+      background: white;
+      height: calc(100vh - 70px);
+      overflow-y: auto;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+      padding-top: 10px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+    }
+
+    .sidebar-menu li {
+      margin: 5px 10px;
+    }
+
+    .sidebar-menu a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      color: var(--text-gray);
+      text-decoration: none;
+      transition: all 0.3s;
+      cursor: pointer;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+
+    .sidebar-menu a:hover {
+      background: rgba(45, 90, 39, 0.08);
+      color: var(--primary-green);
+    }
+
+    .sidebar-menu a.active {
+      background: var(--primary-green);
+      color: white;
+    }
+
+    .sidebar-menu a .icon {
+      font-size: 18px;
+    }
+
+    .admin-main {
+      margin-left: 260px;
+      margin-top: 70px;
+      padding: 30px;
+      min-height: calc(100vh - 70px);
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .form-grid.full {
+      grid-template-columns: 1fr;
+    }
+
+    .textarea-field {
+      grid-column: 1 / -1;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 150px;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    .file-input-wrapper input[type=file] {
+      position: absolute;
+      left: -9999px;
+    }
+
+    .image-preview {
+      margin-top: 10px;
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 4px;
+    }
+
+    .image-upload-container {
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.3s;
+      background: #fafafa;
+    }
+
+    .image-upload-container:hover {
+      border-color: var(--primary-green);
+      background: rgba(45, 90, 39, 0.05);
+    }
+
+    .image-upload-container.dragover {
+      border-color: var(--primary-green);
+      background: rgba(45, 90, 39, 0.1);
+    }
+
+    .image-upload-label {
+      cursor: pointer;
+      display: block;
+    }
+
+    .image-upload-label .upload-icon {
+      font-size: 48px;
+      color: #999;
+      margin-bottom: 10px;
+    }
+
+    .image-upload-label .upload-text {
+      color: var(--text-gray);
+      font-size: 14px;
+    }
+
+    .image-upload-label .upload-text strong {
+      color: var(--primary-green);
+    }
+
+    .image-preview-container {
+      margin-top: 15px;
+      position: relative;
+      display: none;
+    }
+
+    .image-preview-container.has-image {
+      display: block;
+    }
+
+    .image-preview-container img {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .image-preview-container .remove-image {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background: #f44336;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .image-preview-container .remove-image:hover {
+      background: #d32f2f;
+    }
+
+    .current-image-info {
+      font-size: 12px;
+      color: var(--text-gray);
+      margin-top: 8px;
+    }
+
+    .file-input-hidden {
+      display: none;
+    }
+
+    .services-list {
+      display: grid;
+      gap: 20px;
+    }
+
+    .service-card {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 4px;
+      border-left: 4px solid #667eea;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .service-card h3 {
+      margin-bottom: 5px;
+    }
+
+    .service-card p {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .service-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-small {
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    .modal.active {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 1100px;
+      max-height: 90vh;
+      overflow-y: auto;
+      width: 95%;
+    }
+
+    /* Horizontal layout - fields left, image right */
+    .horizontal-form {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 30px;
+    }
+
+    .form-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .form-fields-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .form-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .form-sidebar .image-upload-container {
+      padding: 30px 20px;
+    }
+
+    .form-sidebar .image-preview-container img {
+      max-height: 180px;
+      width: 100%;
+      object-fit: cover;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    /* Pages horizontal layout */
+    .pages-horizontal {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 30px;
+    }
+
+    .pages-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .pages-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .pages-sidebar .image-preview-container img {
+      max-height: 200px;
+      width: 100%;
+      object-fit: cover;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .rating-input {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .rating-input label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin: 0;
+    }
+
+    .rating-input input[type="radio"] {
+      cursor: pointer;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge-featured {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .badge-draft {
+      background: #e2e3e5;
+      color: #383d41;
+    }
+
+    /* Mobile menu toggle button */
+    .mobile-menu-btn {
+      display: none;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 20px;
+    }
+
+    .mobile-menu-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Tablet styles */
+    @media (max-width: 1024px) {
+      .admin-sidebar {
+        width: 220px;
+      }
+
+      .admin-main {
+        margin-left: 220px;
+        padding: 20px;
+      }
+
+      .modal-content {
+        max-width: 90%;
+        padding: 20px;
+      }
+    }
+
+    /* Mobile styles */
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: block;
+      }
+
+      .admin-header {
+        padding: 10px 15px;
+      }
+
+      .admin-header h1 {
+        font-size: 14px;
+      }
+
+      .admin-header-logo {
+        height: 30px;
+      }
+
+      .admin-sidebar {
+        position: fixed;
+        width: 280px;
+        height: calc(100vh - 60px);
+        top: 60px;
+        left: -300px;
+        transition: left 0.3s ease;
+        z-index: 99;
+        box-shadow: 2px 0 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .admin-sidebar.open {
+        left: 0;
+      }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 98;
+      }
+
+      .sidebar-overlay.open {
+        display: block;
+      }
+
+      .admin-main {
+        margin-left: 0;
+        margin-top: 60px;
+        padding: 15px;
+      }
+
+      .card {
+        padding: 15px;
+        border-radius: 6px;
+      }
+
+      .card h2 {
+        font-size: 18px;
+        margin-bottom: 15px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+
+      .form-group label {
+        font-size: 14px;
+      }
+
+      .form-group input,
+      .form-group textarea {
+        padding: 10px;
+        font-size: 14px;
+      }
+
+      textarea {
+        min-height: 100px;
+      }
+
+      .btn {
+        padding: 10px 16px;
+        font-size: 14px;
+      }
+
+      .btn-small {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+
+      .service-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 15px;
+      }
+
+      .service-card h3 {
+        font-size: 16px;
+      }
+
+      .service-card p {
+        font-size: 13px;
+      }
+
+      .service-actions {
+        width: 100%;
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
+      }
+
+      .service-actions .btn {
+        flex: 1;
+        text-align: center;
+      }
+
+      /* Modal responsive */
+      .modal-content {
+        width: 95%;
+        max-width: none;
+        max-height: 85vh;
+        padding: 15px;
+        margin: 10px;
+        border-radius: 8px;
+      }
+
+      .horizontal-form {
+        grid-template-columns: 1fr;
+      }
+
+      .form-fields-row {
+        grid-template-columns: 1fr;
+      }
+
+      .pages-horizontal {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-header {
+        margin-bottom: 15px;
+      }
+
+      .modal-header h2 {
+        font-size: 18px;
+      }
+
+      .close-btn {
+        font-size: 28px;
+        padding: 0 5px;
+      }
+
+      /* Image upload responsive */
+      .image-upload-container {
+        padding: 15px;
+      }
+
+      .image-upload-label .upload-icon {
+        font-size: 36px;
+      }
+
+      .image-upload-label .upload-text {
+        font-size: 12px;
+      }
+
+      .image-preview-container img {
+        max-height: 150px;
+      }
+
+      /* Rating input responsive */
+      .rating-input {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .rating-input label {
+        font-size: 13px;
+      }
+
+      /* Login responsive */
+      .login-box {
+        margin: 15px;
+        padding: 30px 20px;
+      }
+
+      .login-logo img {
+        max-width: 150px;
+      }
+
+      .login-box h1 {
+        font-size: 20px;
+      }
+    }
+
+    /* Small mobile styles */
+    @media (max-width: 480px) {
+      .admin-header-left {
+        gap: 10px;
+      }
+
+      .admin-header h1 {
+        font-size: 12px;
+      }
+
+      .admin-header-logo {
+        height: 25px;
+      }
+
+      .admin-header .btn-secondary {
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+
+      .sidebar-menu a {
+        padding: 12px 15px;
+        font-size: 14px;
+      }
+
+      .card {
+        padding: 12px;
+      }
+
+      .modal-content {
+        padding: 12px;
+      }
+
+      .service-actions {
+        flex-direction: column;
+      }
+
+      .service-actions .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Form -->
+  <div id="loginContainer" class="login-container">
+    <div class="login-box">
+      <div class="login-logo">
+        <img src="/images/logo.png" alt="Living Stone Contractors">
+      </div>
+      <h1>Admin Panel</h1>
+      <p class="login-subtitle">Manage your website content</p>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="password">Admin Password</label>
+          <input type="password" id="password" name="password" required placeholder="Enter your password">
+        </div>
+        <button type="submit" class="btn btn-primary">Sign In</button>
+      </form>
+      <p style="text-align: center; margin-top: 20px; font-size: 12px; color: #999;">
+        Secure admin access
+      </p>
+    </div>
+  </div>
+
+  <!-- Admin Panel -->
+  <div id="adminContainer" class="admin-container">
+    <div class="admin-header">
+      <div class="admin-header-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+        <img src="/images/logos/LSC_sublogo_Verde.png" alt="Living Stone" class="admin-header-logo" style="filter: brightness(0) invert(1);">
+        <h1>Admin Panel</h1>
+      </div>
+      <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="admin-sidebar" id="adminSidebar">
+      <ul class="sidebar-menu">
+        <li><a href="#" class="menu-link" data-section="pages">📄 Pages Content</a></li>
+        <li><a href="#" class="menu-link" data-section="services">🔧 Services</a></li>
+        <li><a href="#" class="menu-link" data-section="testimonials">⭐ Testimonials</a></li>
+        <li><a href="#" class="menu-link" data-section="contact">📞 Contact Info</a></li>
+      </ul>
+    </div>
+
+    <div class="admin-main">
+      <!-- Pages Section -->
+      <div id="pages" class="section active">
+        <div class="card">
+          <h2>Home Page Content</h2>
+          <div id="pagesAlert"></div>
+          <form id="pagesForm" class="pages-horizontal">
+            <div class="pages-fields">
+              <div class="form-fields-row">
+                <div class="form-group">
+                  <label for="heroTitle">Hero Title</label>
+                  <input type="text" id="heroTitle" name="heroTitle">
+                </div>
+                <div class="form-group">
+                  <label for="heroSubtitle">Hero Subtitle</label>
+                  <input type="text" id="heroSubtitle" name="heroSubtitle">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="heroDescription">Hero Description</label>
+                <textarea id="heroDescription" name="heroDescription" style="min-height: 80px;"></textarea>
+              </div>
+              <div class="form-fields-row">
+                <div class="form-group">
+                  <label for="aboutTitle">About Title</label>
+                  <input type="text" id="aboutTitle" name="aboutTitle">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="aboutDescription">About Description</label>
+                <textarea id="aboutDescription" name="aboutDescription" style="min-height: 100px;"></textarea>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-success">Save Pages</button>
+              </div>
+            </div>
+            <div class="pages-sidebar">
+              <div class="form-group">
+                <label>Hero Image</label>
+                <div class="image-upload-container" id="heroImageUpload">
+                  <label class="image-upload-label" for="heroImageFile">
+                    <div class="upload-icon">🖼️</div>
+                    <div class="upload-text">
+                      <strong>Click to upload</strong><br>
+                      PNG, JPG, WebP (max 5MB)
+                    </div>
+                  </label>
+                  <input type="file" id="heroImageFile" name="imageFile" accept="image/*" class="file-input-hidden">
+                  <input type="hidden" id="heroImage" name="heroImage">
+                </div>
+                <div class="image-preview-container" id="heroImagePreview">
+                  <img src="" alt="Preview" id="heroImagePreviewImg">
+                  <button type="button" class="remove-image" onclick="removeHeroImage()">&times;</button>
+                  <div class="current-image-info" id="heroImageInfo"></div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Services Section -->
+      <div id="services" class="section">
+        <div class="card">
+          <h2>Services Management</h2>
+          <button class="btn btn-primary btn-small" id="addServiceBtn">+ Add New Service</button>
+          <div id="servicesAlert"></div>
+          <div id="servicesList" class="services-list" style="margin-top: 20px;"></div>
+        </div>
+      </div>
+
+      <!-- Testimonials Section -->
+      <div id="testimonials" class="section">
+        <div class="card">
+          <h2>Testimonials Management</h2>
+          <div id="testimonialsAlert"></div>
+          <div id="testimonialsList" class="services-list" style="margin-top: 20px;"></div>
+        </div>
+      </div>
+
+      <!-- Contact Section -->
+      <div id="contact" class="section">
+        <div class="card">
+          <h2>Contact Information</h2>
+          <div id="contactAlert"></div>
+          <form id="contactForm" class="form-grid full">
+            <div class="form-group">
+              <label for="contactEmail">Email</label>
+              <input type="email" id="contactEmail" name="email">
+            </div>
+            <div class="form-group">
+              <label for="contactPhone">Phone</label>
+              <input type="tel" id="contactPhone" name="phone">
+            </div>
+            <div class="form-group">
+              <label for="contactAddress">Address</label>
+              <input type="text" id="contactAddress" name="address">
+            </div>
+            <div class="form-group">
+              <label for="contactHours">Business Hours</label>
+              <textarea id="contactHours" name="hours"></textarea>
+            </div>
+            <button type="submit" class="btn btn-success">Save Contact Info</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service Modal -->
+  <div id="serviceModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="serviceModalTitle">Add Service</h2>
+        <button class="close-btn" onclick="closeServiceModal()">&times;</button>
+      </div>
+      <form id="serviceForm" class="horizontal-form">
+        <input type="hidden" id="serviceId" name="id">
+        <div class="form-fields">
+          <div class="form-fields-row">
+            <div class="form-group">
+              <label for="serviceTitle">Title *</label>
+              <input type="text" id="serviceTitle" name="title" required>
+            </div>
+            <div class="form-group">
+              <label for="serviceSlug">Slug *</label>
+              <input type="text" id="serviceSlug" name="slug" required>
+            </div>
+          </div>
+          <div class="form-fields-row">
+            <div class="form-group">
+              <label for="serviceIcon">Icon Class</label>
+              <input type="text" id="serviceIcon" name="icon" placeholder="e.g., mdi:home-roof">
+            </div>
+            <div class="form-group">
+              <label for="serviceOrder">Order</label>
+              <input type="number" id="serviceOrder" name="order" value="0">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="serviceDescription">Description *</label>
+            <textarea id="serviceDescription" name="description" required style="min-height: 60px;"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="serviceContent">Content (Markdown)</label>
+            <textarea id="serviceContent" name="content" style="min-height: 120px;"></textarea>
+          </div>
+          <div class="form-fields-row">
+            <div class="form-group">
+              <label for="serviceMetaTitle">Meta Title</label>
+              <input type="text" id="serviceMetaTitle" name="metaTitle">
+            </div>
+            <div class="form-group">
+              <label for="serviceMetaDescription">Meta Description</label>
+              <input type="text" id="serviceMetaDescription" name="metaDescription">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-success">Save Service</button>
+            <button type="button" class="btn btn-secondary" onclick="closeServiceModal()">Cancel</button>
+          </div>
+        </div>
+        <div class="form-sidebar">
+          <div class="form-group">
+            <label>Service Image *</label>
+            <div class="image-upload-container" id="serviceImageUpload">
+              <label class="image-upload-label" for="serviceImageFile">
+                <div class="upload-icon">📷</div>
+                <div class="upload-text">
+                  <strong>Click to upload</strong><br>
+                  PNG, JPG, WebP (max 5MB)
+                </div>
+              </label>
+              <input type="file" id="serviceImageFile" name="imageFile" accept="image/*" class="file-input-hidden">
+              <input type="hidden" id="serviceImage" name="image">
+            </div>
+            <div class="image-preview-container" id="serviceImagePreview">
+              <img src="" alt="Preview" id="serviceImagePreviewImg">
+              <button type="button" class="remove-image" onclick="removeServiceImage()">&times;</button>
+              <div class="current-image-info" id="serviceImageInfo"></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="serviceFeatured" name="featured">
+              Featured Service
+            </label>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Testimonial Modal -->
+  <div id="testimonialModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="testimonialModalTitle">Add Testimonial</h2>
+        <button class="close-btn" onclick="closeTestimonialModal()">&times;</button>
+      </div>
+      <form id="testimonialForm" class="horizontal-form">
+        <input type="hidden" id="testimonialId" name="id">
+        <div class="form-fields">
+          <div class="form-fields-row">
+            <div class="form-group">
+              <label for="testimonialName">Client Name *</label>
+              <input type="text" id="testimonialName" name="name" required>
+            </div>
+            <div class="form-group">
+              <label for="testimonialCompany">Company (Optional)</label>
+              <input type="text" id="testimonialCompany" name="company">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="testimonialContent">Testimonial *</label>
+            <textarea id="testimonialContent" name="content" required style="min-height: 100px;"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Rating *</label>
+            <div style="display: flex; gap: 20px; margin-top: 8px;">
+              <label><input type="radio" name="rating" value="5" checked> ⭐⭐⭐⭐⭐</label>
+              <label><input type="radio" name="rating" value="4"> ⭐⭐⭐⭐</label>
+              <label><input type="radio" name="rating" value="3"> ⭐⭐⭐</label>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-success">Save Testimonial</button>
+            <button type="button" class="btn btn-secondary" onclick="closeTestimonialModal()">Cancel</button>
+          </div>
+        </div>
+        <div class="form-sidebar">
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="testimonialFeatured" name="featured">
+              Featured Testimonial
+            </label>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/admin/app.js"></script>
+</body>
+</html>

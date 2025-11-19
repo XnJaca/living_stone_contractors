@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: living-stone-contractors
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: ADMIN_PASSWORD
+        value: ${ADMIN_PASSWORD}
+        sync: false
