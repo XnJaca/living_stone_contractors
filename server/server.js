@@ -7,7 +7,7 @@ import { existsSync, mkdirSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
 import pool from './db/config.js';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { v2 as cloudinary } from 'cloudinary';
 
 const __dirname_root = fileURLToPath(new URL('..', import.meta.url));
 dotenv.config({ path: join(__dirname_root, '.env.local') });
@@ -19,40 +19,36 @@ const PORT = process.env.PORT || 3001;
 // Admin password from env
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 
-// Backblaze B2 configuration
-const B2_ENABLED = process.env.B2_BUCKET_NAME && process.env.B2_KEY_ID && process.env.B2_APP_KEY;
-let s3Client = null;
+// Cloudinary configuration
+const CLOUDINARY_ENABLED = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
 
-if (B2_ENABLED) {
-  s3Client = new S3Client({
-    endpoint: `https://s3.${process.env.B2_REGION || 'us-west-004'}.backblazeb2.com`,
-    region: process.env.B2_REGION || 'us-west-004',
-    credentials: {
-      accessKeyId: process.env.B2_KEY_ID,
-      secretAccessKey: process.env.B2_APP_KEY,
-    },
+if (CLOUDINARY_ENABLED) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
   });
-  console.log('📦 Backblaze B2 storage enabled');
+  console.log('☁️ Cloudinary storage enabled');
 } else {
   console.log('📁 Using local file storage');
 }
 
-// Function to upload file to Backblaze B2
-async function uploadToB2(file) {
-  const ext = file.originalname.split('.').pop();
-  const filename = `${uuidv4()}.${ext}`;
+// Function to upload file to Cloudinary
+async function uploadToCloudinary(file) {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'living-stone',
+        resource_type: 'image',
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result.secure_url);
+      }
+    );
 
-  const command = new PutObjectCommand({
-    Bucket: process.env.B2_BUCKET_NAME,
-    Key: `uploads/${filename}`,
-    Body: file.buffer,
-    ContentType: file.mimetype,
+    uploadStream.end(file.buffer);
   });
-
-  await s3Client.send(command);
-
-  // Return the public URL
-  return `https://${process.env.B2_BUCKET_NAME}.s3.${process.env.B2_REGION || 'us-west-004'}.backblazeb2.com/uploads/${filename}`;
 }
 
 // Middleware
@@ -66,8 +62,8 @@ if (!existsSync(uploadDir)) {
   mkdirSync(uploadDir, { recursive: true });
 }
 
-// Use memory storage when B2 is enabled, disk storage otherwise
-const storage = B2_ENABLED
+// Use memory storage when Cloudinary is enabled, disk storage otherwise
+const storage = CLOUDINARY_ENABLED
   ? multer.memoryStorage()
   : multer.diskStorage({
       destination: (req, file, cb) => {
@@ -85,8 +81,8 @@ const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } }); // 1
 async function getImageUrl(file) {
   if (!file) return null;
 
-  if (B2_ENABLED) {
-    return await uploadToB2(file);
+  if (CLOUDINARY_ENABLED) {
+    return await uploadToCloudinary(file);
   } else {
     return `/uploads/${file.filename}`;
   }
