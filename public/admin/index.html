@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Living Stone - Admin Panel</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .login-box {
+      background: white;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-box h1 {
+      margin-bottom: 30px;
+      text-align: center;
+      color: #333;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      background: #5568d3;
+    }
+
+    .btn-secondary {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background: #d0d0d0;
+    }
+
+    .btn-danger {
+      background: #f44336;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #d32f2f;
+    }
+
+    .btn-success {
+      background: #4caf50;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #388e3c;
+    }
+
+    /* Admin Layout */
+    .admin-container {
+      display: none;
+      min-height: 100vh;
+      background: #f5f5f5;
+    }
+
+    .admin-header {
+      background: white;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .admin-header h1 {
+      font-size: 24px;
+    }
+
+    .admin-sidebar {
+      position: fixed;
+      left: 0;
+      top: 70px;
+      width: 250px;
+      background: white;
+      height: calc(100vh - 70px);
+      overflow-y: auto;
+      box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-menu {
+      list-style: none;
+    }
+
+    .sidebar-menu li {
+      border-bottom: 1px solid #eee;
+    }
+
+    .sidebar-menu a {
+      display: block;
+      padding: 16px 20px;
+      color: #666;
+      text-decoration: none;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .sidebar-menu a:hover,
+    .sidebar-menu a.active {
+      background: #f0f0f0;
+      color: #667eea;
+      padding-left: 30px;
+    }
+
+    .admin-main {
+      margin-left: 250px;
+      margin-top: 70px;
+      padding: 30px;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .form-grid.full {
+      grid-template-columns: 1fr;
+    }
+
+    .textarea-field {
+      grid-column: 1 / -1;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 150px;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    .file-input-wrapper input[type=file] {
+      position: absolute;
+      left: -9999px;
+    }
+
+    .image-preview {
+      margin-top: 10px;
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 4px;
+    }
+
+    .services-list {
+      display: grid;
+      gap: 20px;
+    }
+
+    .service-card {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 4px;
+      border-left: 4px solid #667eea;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .service-card h3 {
+      margin-bottom: 5px;
+    }
+
+    .service-card p {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .service-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-small {
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    .modal.active {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      width: 90%;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .rating-input {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .rating-input label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin: 0;
+    }
+
+    .rating-input input[type="radio"] {
+      cursor: pointer;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge-featured {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .badge-draft {
+      background: #e2e3e5;
+      color: #383d41;
+    }
+
+    @media (max-width: 768px) {
+      .admin-sidebar {
+        width: 100%;
+        height: auto;
+        top: 70px;
+        display: none;
+      }
+
+      .admin-sidebar.open {
+        display: block;
+      }
+
+      .admin-main {
+        margin-left: 0;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .service-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .service-actions {
+        width: 100%;
+        margin-top: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Form -->
+  <div id="loginContainer" class="login-container">
+    <div class="login-box">
+      <h1>Living Stone Contractors</h1>
+      <p style="text-align: center; margin-bottom: 30px; color: #666;">Admin Panel</p>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="password">Admin Password</label>
+          <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Panel -->
+  <div id="adminContainer" class="admin-container">
+    <div class="admin-header">
+      <h1>Admin Panel - Living Stone Contractors</h1>
+      <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+    </div>
+
+    <div class="admin-sidebar">
+      <ul class="sidebar-menu">
+        <li><a href="#" class="menu-link" data-section="pages">📄 Pages Content</a></li>
+        <li><a href="#" class="menu-link" data-section="services">🔧 Services</a></li>
+        <li><a href="#" class="menu-link" data-section="testimonials">⭐ Testimonials</a></li>
+        <li><a href="#" class="menu-link" data-section="contact">📞 Contact Info</a></li>
+      </ul>
+    </div>
+
+    <div class="admin-main">
+      <!-- Pages Section -->
+      <div id="pages" class="section active">
+        <div class="card">
+          <h2>Home Page Content</h2>
+          <div id="pagesAlert"></div>
+          <form id="pagesForm" class="form-grid full">
+            <div class="form-group">
+              <label for="heroTitle">Hero Title</label>
+              <input type="text" id="heroTitle" name="heroTitle">
+            </div>
+            <div class="form-group">
+              <label for="heroSubtitle">Hero Subtitle</label>
+              <input type="text" id="heroSubtitle" name="heroSubtitle">
+            </div>
+            <div class="form-group">
+              <label for="heroDescription">Hero Description</label>
+              <textarea id="heroDescription" name="heroDescription"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="heroImage">Hero Image URL</label>
+              <input type="text" id="heroImage" name="heroImage">
+            </div>
+            <div class="form-group">
+              <label for="aboutTitle">About Title</label>
+              <input type="text" id="aboutTitle" name="aboutTitle">
+            </div>
+            <div class="form-group">
+              <label for="aboutDescription">About Description</label>
+              <textarea id="aboutDescription" name="aboutDescription"></textarea>
+            </div>
+            <button type="submit" class="btn btn-success">Save Pages</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Services Section -->
+      <div id="services" class="section">
+        <div class="card">
+          <h2>Services Management</h2>
+          <button class="btn btn-primary btn-small" id="addServiceBtn">+ Add New Service</button>
+          <div id="servicesAlert"></div>
+          <div id="servicesList" class="services-list" style="margin-top: 20px;"></div>
+        </div>
+      </div>
+
+      <!-- Testimonials Section -->
+      <div id="testimonials" class="section">
+        <div class="card">
+          <h2>Testimonials Management</h2>
+          <button class="btn btn-primary btn-small" id="addTestimonialBtn">+ Add New Testimonial</button>
+          <div id="testimonialsAlert"></div>
+          <div id="testimonialsList" class="services-list" style="margin-top: 20px;"></div>
+        </div>
+      </div>
+
+      <!-- Contact Section -->
+      <div id="contact" class="section">
+        <div class="card">
+          <h2>Contact Information</h2>
+          <div id="contactAlert"></div>
+          <form id="contactForm" class="form-grid full">
+            <div class="form-group">
+              <label for="contactEmail">Email</label>
+              <input type="email" id="contactEmail" name="email">
+            </div>
+            <div class="form-group">
+              <label for="contactPhone">Phone</label>
+              <input type="tel" id="contactPhone" name="phone">
+            </div>
+            <div class="form-group">
+              <label for="contactAddress">Address</label>
+              <input type="text" id="contactAddress" name="address">
+            </div>
+            <div class="form-group">
+              <label for="contactHours">Business Hours</label>
+              <textarea id="contactHours" name="hours"></textarea>
+            </div>
+            <button type="submit" class="btn btn-success">Save Contact Info</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service Modal -->
+  <div id="serviceModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="serviceModalTitle">Add Service</h2>
+        <button class="close-btn" onclick="closeServiceModal()">&times;</button>
+      </div>
+      <form id="serviceForm" class="form-grid full">
+        <input type="hidden" id="serviceId" name="id">
+        <div class="form-group">
+          <label for="serviceTitle">Title *</label>
+          <input type="text" id="serviceTitle" name="title" required>
+        </div>
+        <div class="form-group">
+          <label for="serviceSlug">Slug *</label>
+          <input type="text" id="serviceSlug" name="slug" required>
+        </div>
+        <div class="form-group">
+          <label for="serviceDescription">Description *</label>
+          <textarea id="serviceDescription" name="description" required></textarea>
+        </div>
+        <div class="form-group textarea-field">
+          <label for="serviceContent">Content (Markdown)</label>
+          <textarea id="serviceContent" name="content" style="min-height: 300px;"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="serviceImage">Image URL *</label>
+          <input type="text" id="serviceImage" name="image" required>
+        </div>
+        <div class="form-group">
+          <label for="serviceIcon">Icon Class</label>
+          <input type="text" id="serviceIcon" name="icon" placeholder="e.g., mdi:home-roof">
+        </div>
+        <div class="form-group">
+          <label for="serviceOrder">Order</label>
+          <input type="number" id="serviceOrder" name="order" value="0">
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="serviceFeatured" name="featured">
+            Featured Service
+          </label>
+        </div>
+        <div class="form-group">
+          <label for="serviceMetaTitle">Meta Title</label>
+          <input type="text" id="serviceMetaTitle" name="metaTitle">
+        </div>
+        <div class="form-group">
+          <label for="serviceMetaDescription">Meta Description</label>
+          <textarea id="serviceMetaDescription" name="metaDescription"></textarea>
+        </div>
+        <div style="grid-column: 1 / -1; display: flex; gap: 10px;">
+          <button type="submit" class="btn btn-success">Save Service</button>
+          <button type="button" class="btn btn-secondary" onclick="closeServiceModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Testimonial Modal -->
+  <div id="testimonialModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="testimonialModalTitle">Add Testimonial</h2>
+        <button class="close-btn" onclick="closeTestimonialModal()">&times;</button>
+      </div>
+      <form id="testimonialForm" class="form-grid full">
+        <input type="hidden" id="testimonialId" name="id">
+        <div class="form-group">
+          <label for="testimonialName">Client Name *</label>
+          <input type="text" id="testimonialName" name="name" required>
+        </div>
+        <div class="form-group">
+          <label for="testimonialCompany">Company (Optional)</label>
+          <input type="text" id="testimonialCompany" name="company">
+        </div>
+        <div class="form-group textarea-field">
+          <label for="testimonialContent">Testimonial *</label>
+          <textarea id="testimonialContent" name="content" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>Rating *</label>
+          <div class="rating-input">
+            <label><input type="radio" name="rating" value="5" checked> ⭐⭐⭐⭐⭐ 5 Stars</label>
+          </div>
+          <div class="rating-input">
+            <label><input type="radio" name="rating" value="4"> ⭐⭐⭐⭐ 4 Stars</label>
+          </div>
+          <div class="rating-input">
+            <label><input type="radio" name="rating" value="3"> ⭐⭐⭐ 3 Stars</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="testimonialImage">Image URL</label>
+          <input type="text" id="testimonialImage" name="image">
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="testimonialFeatured" name="featured">
+            Featured Testimonial
+          </label>
+        </div>
+        <div style="grid-column: 1 / -1; display: flex; gap: 10px;">
+          <button type="submit" class="btn btn-success">Save Testimonial</button>
+          <button type="button" class="btn btn-secondary" onclick="closeTestimonialModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/admin/app.js"></script>
+</body>
+</html>

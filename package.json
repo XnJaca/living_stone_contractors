@@ -3,10 +3,12 @@
   "type": "module",
   "version": "1.0.0",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "concurrently \"astro dev\" \"npm run server:dev\"",
     "start": "astro dev",
+    "server:dev": "node --watch server/server.js",
     "build": "astro check && astro build",
     "preview": "astro preview",
+    "start:prod": "node server/server.js",
     "astro": "astro"
   },
   "dependencies": {
@@ -16,10 +18,16 @@
     "@nestjs/mapped-types": "^2.1.0",
     "astro": "^4.15.0",
     "astro-icon": "^1.1.0",
-    "tailwindcss": "^3.4.0"
+    "tailwindcss": "^3.4.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.32.6",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "concurrently": "^8.2.0",
     "typescript": "^5.5.0"
   }
 }
