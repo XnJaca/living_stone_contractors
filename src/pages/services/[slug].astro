@@ -2,8 +2,8 @@
 import MainLayout from '../../layouts/MainLayout.astro';
 import { marked } from 'marked';
 
-// API URL
-const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001';
+// API URL - use PORT env var for same-server setup
+const API_URL = `http://localhost:${process.env.PORT || 3001}`;
 
 // Get slug from URL
 const { slug } = Astro.params;
