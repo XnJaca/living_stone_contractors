@@ -1,5 +1,8 @@
 -- Create tables for Living Stone Contractors Admin Panel
 
+-- Ensure we're on the right database
+-- (This runs in the living_stone database created by POSTGRES_DB env var)
+
 -- Pages table (hero, about content)
 CREATE TABLE IF NOT EXISTS pages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

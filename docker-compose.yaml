@@ -5,15 +5,13 @@ services:
     image: postgres:17
     restart: always
     ports:
-      - "5432:5432"
+      - "5434:5432"
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
       POSTGRES_DB: ${DB_NAME:-living_stone}
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --auth-local=scram-sha-256
     container_name: living_stone_db
-    tmpfs:
-      - /var/lib/postgresql/data:noexec,nosuid,size=500m
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -21,3 +19,5 @@ services:
       retries: 5
     volumes:
       - ./server/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./server/db/init.sh:/docker-entrypoint-initdb.d/00-init.sh
+      - ./postgres:/var/lib/postgresql/data
