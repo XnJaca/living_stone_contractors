@@ -35,6 +35,7 @@ lerna-debug.log*
 *.sw?
 
 # Database
+postgres/
 postgres_data/
 *.sqlite
 *.db
