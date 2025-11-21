@@ -145,7 +145,8 @@ app.get('/api/pages', async (req, res) => {
         heroDescription: page.hero_description,
         heroImage: page.hero_image,
         aboutTitle: page.about_title,
-        aboutDescription: page.about_description
+        aboutDescription: page.about_description,
+        aboutContent: page.about_content
       }
     });
   } catch (error) {
@@ -169,7 +170,8 @@ app.put('/api/pages/:page', checkAuth, upload.single('heroImage'), async (req, r
       heroDescription,
       heroImage,
       aboutTitle,
-      aboutDescription
+      aboutDescription,
+      aboutContent
     } = req.body;
 
     const imageUrl = req.file ? await getImageUrl(req.file) : heroImage;
@@ -177,11 +179,11 @@ app.put('/api/pages/:page', checkAuth, upload.single('heroImage'), async (req, r
     const result = await pool.query(
       `UPDATE pages
        SET hero_title = $1, hero_subtitle = $2, hero_description = $3,
-           hero_image = $4, about_title = $5, about_description = $6,
+           hero_image = $4, about_title = $5, about_description = $6, about_content = $7,
            updated_at = CURRENT_TIMESTAMP
-       WHERE slug = $7
+       WHERE slug = $8
        RETURNING *`,
-      [heroTitle, heroSubtitle, heroDescription, imageUrl, aboutTitle, aboutDescription, 'home']
+      [heroTitle, heroSubtitle, heroDescription, imageUrl, aboutTitle, aboutDescription, aboutContent, 'home']
     );
 
     res.json({
@@ -192,7 +194,8 @@ app.put('/api/pages/:page', checkAuth, upload.single('heroImage'), async (req, r
         heroDescription: result.rows[0].hero_description,
         heroImage: result.rows[0].hero_image,
         aboutTitle: result.rows[0].about_title,
-        aboutDescription: result.rows[0].about_description
+        aboutDescription: result.rows[0].about_description,
+        aboutContent: result.rows[0].about_content
       }
     });
   } catch (error) {
