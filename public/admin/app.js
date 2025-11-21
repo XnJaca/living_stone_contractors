@@ -400,7 +400,14 @@ async function editService(id) {
 
     // Load content into Quill editor
     if (serviceContentQuill) {
-      const delta = serviceContentQuill.clipboard.convert(service.content || '');
+      let content = service.content || '';
+
+      // Detect if content is Markdown and convert to HTML
+      if (content && (content.includes('##') || content.includes('###') || content.match(/^[-*]\s/m))) {
+        content = marked.parse(content);
+      }
+
+      const delta = serviceContentQuill.clipboard.convert(content);
       serviceContentQuill.setContents(delta);
     }
 
