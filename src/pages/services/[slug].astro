@@ -1,5 +1,6 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
+import { marked } from 'marked';
 
 // API URL - use PORT env var for same-server setup
 const API_URL = `http://localhost:${process.env.PORT || 3001}`;
@@ -42,8 +43,11 @@ if (!service) {
   return Astro.redirect('/404');
 }
 
-// Content is already HTML from Quill editor
-const contentHtml = service.content || '';
+// Detect if content is Markdown and convert to HTML
+let contentHtml = service.content || '';
+if (contentHtml && (contentHtml.includes('##') || contentHtml.includes('###') || contentHtml.match(/^[-*]\s/m))) {
+  contentHtml = await marked(contentHtml);
+}
 ---
 
 <MainLayout
