@@ -1,6 +1,5 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import { marked } from 'marked';
 
 // API URL - use PORT env var for same-server setup
 const API_URL = `http://localhost:${process.env.PORT || 3001}`;
@@ -43,8 +42,8 @@ if (!service) {
   return Astro.redirect('/404');
 }
 
-// Parse Markdown content to HTML
-const contentHtml = service.content ? await marked(service.content) : '';
+// Content is already HTML from Quill editor
+const contentHtml = service.content || '';
 ---
 
 <MainLayout

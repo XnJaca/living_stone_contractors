@@ -1,12 +1,33 @@
 // Admin Panel App
 const API_URL = '';
 let adminPassword = null;
+let serviceContentQuill = null;
 
 // Initialize on load
 document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
   checkAuth();
+  initializeQuillEditor();
 });
+
+// Initialize Quill Rich Text Editor
+function initializeQuillEditor() {
+  const toolbarOptions = [
+    [{ 'header': [2, 3, false] }],
+    ['bold', 'italic', 'underline'],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    ['link'],
+    ['clean']
+  ];
+
+  serviceContentQuill = new Quill('#serviceContentEditor', {
+    theme: 'snow',
+    modules: {
+      toolbar: toolbarOptions
+    },
+    placeholder: 'Write your service content here...'
+  });
+}
 
 function setupEventListeners() {
   // Login form
@@ -354,6 +375,10 @@ function openServiceModal() {
   document.getElementById('serviceForm').reset();
   document.getElementById('serviceModalTitle').textContent = 'Add Service';
   removeServiceImage();
+  // Clear Quill editor
+  if (serviceContentQuill) {
+    serviceContentQuill.setText('');
+  }
   document.getElementById('serviceModal').classList.add('active');
 }
 
@@ -372,7 +397,13 @@ async function editService(id) {
     document.getElementById('serviceTitle').value = service.title;
     document.getElementById('serviceSlug').value = service.slug;
     document.getElementById('serviceDescription').value = service.description;
-    document.getElementById('serviceContent').value = service.content || '';
+
+    // Load content into Quill editor
+    if (serviceContentQuill) {
+      const delta = serviceContentQuill.clipboard.convert(service.content || '');
+      serviceContentQuill.setContents(delta);
+    }
+
     document.getElementById('serviceIcon').value = service.icon || '';
     document.getElementById('serviceOrder').value = service.order || 0;
     document.getElementById('serviceFeatured').checked = service.featured || false;
@@ -416,6 +447,12 @@ async function handleServiceSave(e) {
   const id = form.querySelector('#serviceId').value;
   const fileInput = document.getElementById('serviceImageFile');
   const hasNewFile = fileInput.files && fileInput.files.length > 0;
+
+  // Save Quill content to hidden input
+  if (serviceContentQuill) {
+    const htmlContent = serviceContentQuill.root.innerHTML;
+    document.getElementById('serviceContent').value = htmlContent;
+  }
 
   // Use FormData for file upload
   const formData = new FormData();
