@@ -51,6 +51,27 @@ async function uploadToCloudinary(file) {
   });
 }
 
+// Function to delete file from Cloudinary
+async function deleteFromCloudinary(imageUrl) {
+  if (!CLOUDINARY_ENABLED || !imageUrl) return;
+
+  // Only delete if it's a Cloudinary URL
+  if (!imageUrl.includes('cloudinary.com')) return;
+
+  try {
+    // Extract public_id from URL
+    // Example URL: https://res.cloudinary.com/dclhd8w8v/image/upload/v1234567890/living-stone/filename.jpg
+    const matches = imageUrl.match(/\/living-stone\/(.+)\.[^.]+$/);
+    if (matches && matches[1]) {
+      const publicId = `living-stone/${matches[1]}`;
+      await cloudinary.uploader.destroy(publicId);
+      console.log(`🗑️ Deleted image from Cloudinary: ${publicId}`);
+    }
+  } catch (error) {
+    console.error('Error deleting from Cloudinary:', error);
+  }
+}
+
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
@@ -309,7 +330,17 @@ app.put('/api/services/:id', checkAuth, upload.single('image'), async (req, res)
       metaDescription
     } = req.body;
 
-    const imageUrl = req.file ? await getImageUrl(req.file) : image;
+    let imageUrl = image;
+
+    // If new image uploaded, delete old one and upload new
+    if (req.file) {
+      // Get old image URL
+      const oldService = await pool.query('SELECT image FROM services WHERE id = $1', [req.params.id]);
+      if (oldService.rows.length > 0) {
+        await deleteFromCloudinary(oldService.rows[0].image);
+      }
+      imageUrl = await getImageUrl(req.file);
+    }
 
     const result = await pool.query(
       `UPDATE services
@@ -351,14 +382,18 @@ app.put('/api/services/:id', checkAuth, upload.single('image'), async (req, res)
 // Delete service
 app.delete('/api/services/:id', checkAuth, async (req, res) => {
   try {
-    const result = await pool.query(
-      'DELETE FROM services WHERE id = $1 RETURNING id',
-      [req.params.id]
-    );
+    // First get the service to retrieve the image URL
+    const service = await pool.query('SELECT image FROM services WHERE id = $1', [req.params.id]);
 
-    if (result.rows.length === 0) {
+    if (service.rows.length === 0) {
       return res.status(404).json({ error: 'Service not found' });
     }
+
+    // Delete the image from Cloudinary
+    await deleteFromCloudinary(service.rows[0].image);
+
+    // Delete the service from database
+    await pool.query('DELETE FROM services WHERE id = $1', [req.params.id]);
 
     res.json({ success: true });
   } catch (error) {
@@ -496,14 +531,18 @@ app.put('/api/testimonials/:id', checkAuth, async (req, res) => {
 // Delete testimonial
 app.delete('/api/testimonials/:id', checkAuth, async (req, res) => {
   try {
-    const result = await pool.query(
-      'DELETE FROM testimonials WHERE id = $1 RETURNING id',
-      [req.params.id]
-    );
+    // First get the testimonial to retrieve the image URL
+    const testimonial = await pool.query('SELECT image FROM testimonials WHERE id = $1', [req.params.id]);
 
-    if (result.rows.length === 0) {
+    if (testimonial.rows.length === 0) {
       return res.status(404).json({ error: 'Testimonial not found' });
     }
+
+    // Delete the image from Cloudinary
+    await deleteFromCloudinary(testimonial.rows[0].image);
+
+    // Delete the testimonial from database
+    await pool.query('DELETE FROM testimonials WHERE id = $1', [req.params.id]);
 
     res.json({ success: true });
   } catch (error) {
