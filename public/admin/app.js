@@ -2,16 +2,17 @@
 const API_URL = '';
 let adminPassword = null;
 let serviceContentQuill = null;
+let aboutContentQuill = null;
 
 // Initialize on load
 document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
   checkAuth();
-  initializeQuillEditor();
+  initializeQuillEditors();
 });
 
-// Initialize Quill Rich Text Editor
-function initializeQuillEditor() {
+// Initialize Quill Rich Text Editors
+function initializeQuillEditors() {
   const toolbarOptions = [
     [{ 'header': [2, 3, false] }],
     ['bold', 'italic', 'underline'],
@@ -26,6 +27,14 @@ function initializeQuillEditor() {
       toolbar: toolbarOptions
     },
     placeholder: 'Write your service content here...'
+  });
+
+  aboutContentQuill = new Quill('#aboutContentEditor', {
+    theme: 'snow',
+    modules: {
+      toolbar: toolbarOptions
+    },
+    placeholder: 'Write your about page content here...'
   });
 }
 
@@ -285,6 +294,16 @@ async function loadPages() {
     document.getElementById('aboutTitle').value = home.aboutTitle || '';
     document.getElementById('aboutDescription').value = home.aboutDescription || '';
 
+    // Load about content into Quill editor
+    if (aboutContentQuill) {
+      let content = home.aboutContent || '';
+      if (content && (content.includes('##') || content.includes('###') || content.match(/^[-*]\s/m))) {
+        content = marked.parse(content);
+      }
+      const delta = aboutContentQuill.clipboard.convert(content);
+      aboutContentQuill.setContents(delta);
+    }
+
     // Show existing hero image
     document.getElementById('heroImageFile').value = '';
     showExistingImage('heroImagePreview', 'heroImagePreviewImg', 'heroImage', 'heroImageInfo', home.heroImage);
@@ -299,6 +318,12 @@ async function handlePagesSave(e) {
   const fileInput = document.getElementById('heroImageFile');
   const hasNewFile = fileInput.files && fileInput.files.length > 0;
 
+  // Save About Quill content to hidden input
+  if (aboutContentQuill) {
+    const htmlContent = aboutContentQuill.root.innerHTML;
+    document.getElementById('aboutContent').value = htmlContent;
+  }
+
   // Use FormData for file upload
   const formData = new FormData();
   formData.append('heroTitle', form.querySelector('#heroTitle').value);
@@ -306,6 +331,7 @@ async function handlePagesSave(e) {
   formData.append('heroDescription', form.querySelector('#heroDescription').value);
   formData.append('aboutTitle', form.querySelector('#aboutTitle').value);
   formData.append('aboutDescription', form.querySelector('#aboutDescription').value);
+  formData.append('aboutContent', document.getElementById('aboutContent').value);
 
   // Add image file or existing URL
   if (hasNewFile) {
