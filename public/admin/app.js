@@ -304,6 +304,16 @@ async function loadPages() {
       aboutContentQuill.setContents(delta);
     }
 
+    // Load Why Choose section
+    document.getElementById('whyChooseTitle').value = home.whyChooseTitle || '';
+    document.getElementById('whyChooseDescription').value = home.whyChooseDescription || '';
+    document.getElementById('feature1Title').value = home.feature1Title || '';
+    document.getElementById('feature1Description').value = home.feature1Description || '';
+    document.getElementById('feature2Title').value = home.feature2Title || '';
+    document.getElementById('feature2Description').value = home.feature2Description || '';
+    document.getElementById('feature3Title').value = home.feature3Title || '';
+    document.getElementById('feature3Description').value = home.feature3Description || '';
+
     // Show existing hero image
     document.getElementById('heroImageFile').value = '';
     showExistingImage('heroImagePreview', 'heroImagePreviewImg', 'heroImage', 'heroImageInfo', home.heroImage);
@@ -332,6 +342,16 @@ async function handlePagesSave(e) {
   formData.append('aboutTitle', form.querySelector('#aboutTitle').value);
   formData.append('aboutDescription', form.querySelector('#aboutDescription').value);
   formData.append('aboutContent', document.getElementById('aboutContent').value);
+
+  // Why Choose section
+  formData.append('whyChooseTitle', form.querySelector('#whyChooseTitle').value);
+  formData.append('whyChooseDescription', form.querySelector('#whyChooseDescription').value);
+  formData.append('feature1Title', form.querySelector('#feature1Title').value);
+  formData.append('feature1Description', form.querySelector('#feature1Description').value);
+  formData.append('feature2Title', form.querySelector('#feature2Title').value);
+  formData.append('feature2Description', form.querySelector('#feature2Description').value);
+  formData.append('feature3Title', form.querySelector('#feature3Title').value);
+  formData.append('feature3Description', form.querySelector('#feature3Description').value);
 
   // Add image file or existing URL
   if (hasNewFile) {

@@ -146,7 +146,15 @@ app.get('/api/pages', async (req, res) => {
         heroImage: page.hero_image,
         aboutTitle: page.about_title,
         aboutDescription: page.about_description,
-        aboutContent: page.about_content
+        aboutContent: page.about_content,
+        whyChooseTitle: page.why_choose_title,
+        whyChooseDescription: page.why_choose_description,
+        feature1Title: page.feature_1_title,
+        feature1Description: page.feature_1_description,
+        feature2Title: page.feature_2_title,
+        feature2Description: page.feature_2_description,
+        feature3Title: page.feature_3_title,
+        feature3Description: page.feature_3_description
       }
     });
   } catch (error) {
@@ -171,7 +179,15 @@ app.put('/api/pages/:page', checkAuth, upload.single('heroImage'), async (req, r
       heroImage,
       aboutTitle,
       aboutDescription,
-      aboutContent
+      aboutContent,
+      whyChooseTitle,
+      whyChooseDescription,
+      feature1Title,
+      feature1Description,
+      feature2Title,
+      feature2Description,
+      feature3Title,
+      feature3Description
     } = req.body;
 
     const imageUrl = req.file ? await getImageUrl(req.file) : heroImage;
@@ -180,10 +196,19 @@ app.put('/api/pages/:page', checkAuth, upload.single('heroImage'), async (req, r
       `UPDATE pages
        SET hero_title = $1, hero_subtitle = $2, hero_description = $3,
            hero_image = $4, about_title = $5, about_description = $6, about_content = $7,
+           why_choose_title = $8, why_choose_description = $9,
+           feature_1_title = $10, feature_1_description = $11,
+           feature_2_title = $12, feature_2_description = $13,
+           feature_3_title = $14, feature_3_description = $15,
            updated_at = CURRENT_TIMESTAMP
-       WHERE slug = $8
+       WHERE slug = $16
        RETURNING *`,
-      [heroTitle, heroSubtitle, heroDescription, imageUrl, aboutTitle, aboutDescription, aboutContent, 'home']
+      [heroTitle, heroSubtitle, heroDescription, imageUrl, aboutTitle, aboutDescription, aboutContent,
+       whyChooseTitle, whyChooseDescription,
+       feature1Title, feature1Description,
+       feature2Title, feature2Description,
+       feature3Title, feature3Description,
+       'home']
     );
 
     res.json({
@@ -195,7 +220,15 @@ app.put('/api/pages/:page', checkAuth, upload.single('heroImage'), async (req, r
         heroImage: result.rows[0].hero_image,
         aboutTitle: result.rows[0].about_title,
         aboutDescription: result.rows[0].about_description,
-        aboutContent: result.rows[0].about_content
+        aboutContent: result.rows[0].about_content,
+        whyChooseTitle: result.rows[0].why_choose_title,
+        whyChooseDescription: result.rows[0].why_choose_description,
+        feature1Title: result.rows[0].feature_1_title,
+        feature1Description: result.rows[0].feature_1_description,
+        feature2Title: result.rows[0].feature_2_title,
+        feature2Description: result.rows[0].feature_2_description,
+        feature3Title: result.rows[0].feature_3_title,
+        feature3Description: result.rows[0].feature_3_description
       }
     });
   } catch (error) {

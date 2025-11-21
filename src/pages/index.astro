@@ -10,7 +10,15 @@ let pageData = {
   heroTitle: 'Transform Your Home',
   heroSubtitle: 'Build Your Dreams',
   heroDescription: 'Transforming spaces into functional, modern, and durable places',
-  heroImage: '/images/placeholders/hero-bg.png'
+  heroImage: '/images/placeholders/hero-bg.png',
+  whyChooseTitle: 'Why Choose Living Stone Contractors?',
+  whyChooseDescription: 'We are passionate about every detail of the process, from planning to execution, ensuring high-quality results that reflect the style and needs of each client. Our approach combines technical expertise, premium materials, and reliable service.',
+  feature1Title: 'Licensed & Insured',
+  feature1Description: 'Fully licensed contractors with comprehensive insurance coverage',
+  feature2Title: 'Transparent Pricing',
+  feature2Description: 'No hidden fees. Clear estimates before we start',
+  feature3Title: 'Expert Team',
+  feature3Description: 'Skilled craftsmen with decades of combined experience'
 };
 
 let featuredServices = [];
@@ -98,11 +106,9 @@ try {
     <div class="container-custom">
       <div class="grid md:grid-cols-2 gap-12 items-center">
         <div>
-          <h2 class="mb-6">Why Choose Living Stone Contractors?</h2>
+          <h2 class="mb-6">{pageData.whyChooseTitle}</h2>
           <p class="text-lg text-gray-600 mb-6">
-            We are passionate about every detail of the process, from planning to execution,
-            ensuring high-quality results that reflect the style and needs of each client.
-            Our approach combines technical expertise, premium materials, and reliable service.
+            {pageData.whyChooseDescription}
           </p>
           <div class="space-y-4">
             <div class="flex items-start gap-4">
@@ -112,8 +118,8 @@ try {
                 </svg>
               </div>
               <div>
-                <h4 class="font-semibold mb-1">Licensed & Insured</h4>
-                <p class="text-gray-600">Fully licensed contractors with comprehensive insurance coverage</p>
+                <h4 class="font-semibold mb-1">{pageData.feature1Title}</h4>
+                <p class="text-gray-600">{pageData.feature1Description}</p>
               </div>
             </div>
             <div class="flex items-start gap-4">
@@ -123,8 +129,8 @@ try {
                 </svg>
               </div>
               <div>
-                <h4 class="font-semibold mb-1">Transparent Pricing</h4>
-                <p class="text-gray-600">No hidden fees. Clear estimates before we start</p>
+                <h4 class="font-semibold mb-1">{pageData.feature2Title}</h4>
+                <p class="text-gray-600">{pageData.feature2Description}</p>
               </div>
             </div>
             <div class="flex items-start gap-4">
@@ -134,8 +140,8 @@ try {
                 </svg>
               </div>
               <div>
-                <h4 class="font-semibold mb-1">Expert Team</h4>
-                <p class="text-gray-600">Skilled craftsmen with decades of combined experience</p>
+                <h4 class="font-semibold mb-1">{pageData.feature3Title}</h4>
+                <p class="text-gray-600">{pageData.feature3Description}</p>
               </div>
             </div>
           </div>
@@ -146,7 +152,7 @@ try {
             alt="Living Stone Contractors"
             class="w-full max-w-md mx-auto"
           />
-          <p class="text-sm text-gray-600 mt-2">License #165925</p>
+          <!-- <p class="text-sm text-gray-600 mt-2">License #165925</p> -->
         </div>
       </div>
     </div>
