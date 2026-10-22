@@ -24,7 +24,7 @@ try {
 
   if (servicesRes.ok) {
     const services = await servicesRes.json();
-    service = services.find((s: any) => s.slug === slug);
+    service = services.find((s: any) => s.slug?.trim().toLowerCase() === slug?.trim().toLowerCase());
     otherServices = services
       .filter((s: any) => s.slug !== slug)
       .sort((a: any, b: any) => a.order - b.order)
