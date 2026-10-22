@@ -10,7 +10,7 @@ export interface Props {
 
 const {
   title = 'Living Stone Contractors, LLC - Home Remodeling & Improvement Specialists',
-  description = 'Specialized in home remodeling and improvement, transforming spaces into functional, modern, and durable places. Technical expertise, premium materials, and reliable service that exceeds expectations.',
+  description = 'Specialized in home remodeling, improvement, and commercial renovations, transforming spaces into functional, modern, and durable places. Technical expertise, premium materials, and reliable service that exceeds expectations.',
   image = '/images/og-image.png',
   canonicalURL = new URL(Astro.url.pathname, Astro.site).href,
 } = Astro.props;
@@ -72,7 +72,7 @@ const fullTitle = title.includes(siteTitle) ? title : `${title} | ${siteTitle}`;
         "@context": "https://schema.org",
         "@type": "GeneralContractor",
         "name": "Living Stone Contractors, LLC",
-        "description": "Specialized in home remodeling and improvement, transforming spaces into functional, modern, and durable places",
+        "description": "Specialized in home remodeling, improvement, and commercial renovations, transforming spaces into functional, modern, and durable places",
         "url": "https://livingstonecontractors.com",
         "logo": "https://livingstonecontractors.com/images/logo.png",
         "image": "https://livingstonecontractors.com/images/og-image.png",
