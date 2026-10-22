@@ -109,6 +109,15 @@ async function getImageUrl(file) {
   }
 }
 
+// Helper function to normalize slugs (e.g. "COMMERCIAL " -> "commercial")
+function slugify(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 // Auth middleware
 const checkAuth = (req, res, next) => {
   const password = req.headers['x-admin-password'];
@@ -324,7 +333,7 @@ app.post('/api/services', checkAuth, upload.single('image'), async (req, res) =>
       `INSERT INTO services (id, title, slug, description, content, image, icon, featured, "order", meta_title, meta_description)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
        RETURNING *`,
-      [serviceId, title, slug, description, content, imageUrl, icon, featured === 'true', parseInt(order) || 0, metaTitle, metaDescription]
+      [serviceId, title, slugify(slug || title), description, content, imageUrl, icon, featured === 'true', parseInt(order) || 0, metaTitle, metaDescription]
     );
 
     const row = result.rows[0];
@@ -385,7 +394,7 @@ app.put('/api/services/:id', checkAuth, upload.single('image'), async (req, res)
            updated_at = CURRENT_TIMESTAMP
        WHERE id = $11
        RETURNING *`,
-      [title, slug, description, content, imageUrl, icon, featured === 'true', parseInt(order) || 0, metaTitle, metaDescription, req.params.id]
+      [title, slugify(slug || title), description, content, imageUrl, icon, featured === 'true', parseInt(order) || 0, metaTitle, metaDescription, req.params.id]
     );
 
     if (result.rows.length === 0) {
