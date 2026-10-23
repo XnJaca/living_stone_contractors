@@ -10,8 +10,12 @@ const { slug } = Astro.params;
 const [services, contact] = await Promise.all([getServices(), getContact()]);
 const service = services.find((s) => slugMatches(s.slug, slug));
 
+// Unknown or retired service URLs go to the services list; other casings go to the canonical URL.
 if (!service) {
-  return Astro.redirect('/404');
+  return Astro.redirect('/services', 301);
+}
+if (Astro.url.pathname !== serviceHref(service)) {
+  return Astro.redirect(serviceHref(service), 301);
 }
 
 const name = titleCase(service.title);
