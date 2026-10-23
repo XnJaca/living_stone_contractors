@@ -1,0 +1,170 @@
+---
+import Icon from './Icon.astro';
+import { getContact, telHref } from '../lib/api';
+
+const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+const contact = await getContact();
+
+const navItems = [
+  { name: 'Home', href: '/preview' },
+  { name: 'Services', href: '/preview/services' },
+  { name: 'About', href: '/preview/about' },
+  { name: 'Contact', href: '/preview/contact' },
+];
+
+const isActive = (href: string) => (href === '/preview' ? currentPath === '/preview' : currentPath.startsWith(href));
+---
+
+<a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded focus:bg-cream focus:px-4 focus:py-2">
+  Skip to content
+</a>
+
+<header class="site-header" data-header>
+  <nav class="container-site flex h-[4.5rem] items-center justify-between gap-6 md:h-20" aria-label="Main">
+    <a href="/preview" class="block shrink-0" aria-label="Living Stone Contractors home">
+      <img src="/images/brand/logo-horizontal-color.webp" alt="" width="640" height="254" class="h-10 w-auto md:h-12" />
+    </a>
+
+    <ul class="hidden items-center gap-9 md:flex">
+      {
+        navItems.map((item) => (
+          <li>
+            <a href={item.href} class:list={['nav-link', { 'is-active': isActive(item.href) }]} aria-current={isActive(item.href) ? 'page' : undefined}>
+              {item.name}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="hidden items-center gap-5 md:flex">
+      <a href={telHref(contact.phone)} class="nav-phone inline-flex items-center gap-2 text-sm font-semibold">
+        <Icon name="phone" size={17} />
+        {contact.phone}
+      </a>
+      <a href="/preview/contact" class="btn btn-primary !px-5 !py-2.5 text-sm">Free Estimate</a>
+    </div>
+
+    <button type="button" class="menu-btn -mr-2 grid h-11 w-11 place-items-center md:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu" data-menu-btn>
+      <Icon name="menu" size={26} class="icon-open" />
+      <Icon name="close" size={26} class="icon-close hidden" />
+    </button>
+  </nav>
+
+  <div id="mobile-menu" class="mobile-menu md:hidden" hidden data-menu>
+    <div class="container-site flex flex-col pb-8 pt-2">
+      {
+        navItems.map((item) => (
+          <a href={item.href} class:list={['border-b border-ink/10 py-4 text-2xl font-semibold', isActive(item.href) ? 'text-primary-700' : 'text-ink']}>
+            {item.name}
+          </a>
+        ))
+      }
+      <a href="/preview/contact" class="btn btn-primary mt-8 w-full">Get a Free Estimate</a>
+      <a href={telHref(contact.phone)} class="btn btn-ghost mt-3 w-full">
+        <Icon name="phone" size={18} />
+        {contact.phone}
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="h-[4.5rem] md:h-20" aria-hidden="true"></div>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    color: #1f2117;
+    background: rgb(252 249 243 / 0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s ease;
+  }
+  .site-header.is-scrolled,
+  .site-header.is-open {
+    border-color: rgb(31 33 23 / 0.08);
+  }
+  /* Scroll progress, drawn like a measuring line under the header. */
+  .site-header::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    height: 1px;
+    width: 100%;
+    background: #6b8f4e;
+    transform: scaleX(var(--progress, 0));
+    transform-origin: left;
+  }
+  .nav-link {
+    position: relative;
+    font-size: 0.92rem;
+    font-weight: 500;
+    padding: 0.4rem 0;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+  }
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: #6b8f4e;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .nav-link:hover,
+  .nav-link.is-active {
+    opacity: 1;
+  }
+  .nav-link:hover::after,
+  .nav-link.is-active::after {
+    transform: scaleX(1);
+  }
+
+  .nav-phone {
+    transition: color 0.2s ease;
+  }
+  .nav-phone:hover {
+    color: #5a7841;
+  }
+
+  .mobile-menu {
+    height: calc(100dvh - 4.5rem);
+    overflow-y: auto;
+  }
+</style>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const btn = document.querySelector<HTMLButtonElement>('[data-menu-btn]');
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
+
+  const onScroll = () => {
+    header?.classList.toggle('is-scrolled', window.scrollY > 24);
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    header?.style.setProperty('--progress', String(max > 0 ? window.scrollY / max : 0));
+  };
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  const setOpen = (open: boolean) => {
+    if (!menu || !btn || !header) return;
+    menu.hidden = !open;
+    header.classList.toggle('is-open', open);
+    btn.setAttribute('aria-expanded', String(open));
+    btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    btn.querySelector('.icon-open')?.classList.toggle('hidden', open);
+    btn.querySelector('.icon-close')?.classList.toggle('hidden', !open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  };
+
+  btn?.addEventListener('click', () => setOpen(menu?.hidden ?? false));
+  document.addEventListener('keydown', (e) => e.key === 'Escape' && setOpen(false));
+  window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => e.matches && setOpen(false));
+</script>

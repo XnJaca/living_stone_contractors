@@ -39,11 +39,18 @@ export default {
         },
         bone: '#E5DDD2', // Beige/Hueso
         cream: '#FCF9F3', // Baby Powder - Blanco crema
+        ink: '#1F2117',
       },
       fontFamily: {
         // Usando Montserrat como alternativa a Gotham Pro (requiere licencia)
-        sans: ['Montserrat', 'system-ui', 'sans-serif'],
-        heading: ['Montserrat', 'system-ui', 'sans-serif']
+        sans: ['"Montserrat Variable"', 'Montserrat', 'system-ui', 'sans-serif'],
+        heading: ['"Montserrat Variable"', 'Montserrat', 'system-ui', 'sans-serif']
+      },
+      maxWidth: {
+        site: '78rem',
+      },
+      transitionTimingFunction: {
+        out: 'cubic-bezier(0.22, 1, 0.36, 1)',
       }
     },
   },

@@ -1,0 +1,180 @@
+---
+import '../styles/global.css';
+import { LICENSES, SERVICE_AREA, getContact, getServices, serviceHref } from '../lib/api';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  canonicalURL?: string;
+  schema?: Record<string, unknown>;
+}
+
+const {
+  title = 'Living Stone Contractors | Home Remodeling & Commercial Renovations in Maryland',
+  description = 'Home remodeling, home improvement, and commercial renovations in Maryland and the DMV. Licensed and insured. Free estimates.',
+  image = '/images/og-image.jpg',
+  canonicalURL = new URL(Astro.url.pathname.replace(/\/$/, '') || '/', Astro.site).href,
+  schema,
+} = Astro.props;
+
+// The renewal is reviewed at /preview on the live site and must stay out of search results.
+const noindex = true;
+const siteTitle = 'Living Stone Contractors';
+const fullTitle = title.includes(siteTitle) ? title : `${title} | ${siteTitle}`;
+const imageURL = new URL(image, Astro.site).href;
+
+const [contact, services] = await Promise.all([getContact(), getServices()]);
+const phoneDigits = contact.phone.replace(/\D/g, '').replace(/^1/, '');
+const [locality, regionZip = ''] = contact.address.split(',').map((s) => s.trim());
+const [region, postalCode] = regionZip.split(/\s+/);
+
+const business = {
+  '@context': 'https://schema.org',
+  '@type': 'GeneralContractor',
+  '@id': `${Astro.site}#business`,
+  name: 'Living Stone Contractors, LLC',
+  slogan: 'Building Trust. Delivering Excellence.',
+  description,
+  url: Astro.site?.href,
+  logo: new URL('/images/logo.png', Astro.site).href,
+  image: imageURL,
+  telephone: `+1-${phoneDigits.slice(0, 3)}-${phoneDigits.slice(3, 6)}-${phoneDigits.slice(6)}`,
+  email: contact.email,
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: locality,
+    addressRegion: region,
+    postalCode,
+    addressCountry: 'US',
+  },
+  areaServed: [{ '@type': 'State', name: 'Maryland' }, ...SERVICE_AREA.map((name) => ({ '@type': 'Place', name }))],
+  hasCredential: LICENSES.map((l) => ({
+    '@type': 'EducationalOccupationalCredential',
+    credentialCategory: 'license',
+    name: `${l.label} License #${l.number}`,
+  })),
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      opens: '08:00',
+      closes: '17:00',
+    },
+  ],
+  sameAs: [
+    'https://www.facebook.com/share/1ARaJi2Msq/',
+    'https://www.instagram.com/livingstonecontractorsllc',
+  ],
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Remodeling & Renovation Services',
+    itemListElement: services.map((s) => ({
+      '@type': 'Offer',
+      itemOffered: { '@type': 'Service', name: s.metaTitle?.split('|')[0].trim() || s.title, url: new URL(serviceHref(s), Astro.site).href },
+    })),
+  },
+};
+---
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline>document.documentElement.classList.replace('no-js', 'js');</script>
+
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#1F2117" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large'} />
+    <link rel="canonical" href={canonicalURL} />
+    <meta name="geo.region" content="US-MD" />
+    <meta name="geo.placename" content={locality} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Living Stone Contractors" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={imageURL} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageURL} />
+
+    <link rel="preconnect" href="https://res.cloudinary.com" />
+
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(business)} />
+    {schema && <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />}
+  </head>
+  <body>
+    <!-- Faint drafting columns behind the whole page; they draw down on load. -->
+    <div class="blueprint pointer-events-none fixed inset-0 z-0" aria-hidden="true">
+      <div class="container-site grid h-full grid-cols-2 md:grid-cols-4">
+        <span></span><span></span><span class="hidden md:block"></span><span class="hidden md:block"></span>
+      </div>
+    </div>
+    <div class="relative z-[1]">
+      <slot />
+    </div>
+
+    <script>
+      const els = document.querySelectorAll<HTMLElement>('.reveal, .rise, .lay, [data-measure]');
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            entry.target.classList.add('is-in');
+            io.unobserve(entry.target);
+          }
+        },
+        { rootMargin: '0px 0px -10% 0px' },
+      );
+      els.forEach((el) => io.observe(el));
+    </script>
+  </body>
+</html>
+
+<style>
+  .blueprint span {
+    border-left: 1px solid rgb(31 33 23 / 0.045);
+    transform-origin: top;
+    animation: draw-down 1.8s cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
+  .blueprint span:last-child {
+    border-right: 1px solid rgb(31 33 23 / 0.045);
+  }
+  .blueprint span:nth-child(2) {
+    animation-delay: 0.12s;
+  }
+  .blueprint span:nth-child(3) {
+    animation-delay: 0.24s;
+  }
+  .blueprint span:nth-child(4) {
+    animation-delay: 0.36s;
+  }
+  @media (max-width: 767px) {
+    .blueprint span:nth-child(2) {
+      border-right: 1px solid rgb(31 33 23 / 0.045);
+    }
+  }
+  @keyframes draw-down {
+    from {
+      transform: scaleY(0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .blueprint span {
+      animation: none;
+    }
+  }
+</style>

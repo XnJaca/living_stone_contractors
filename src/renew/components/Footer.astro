@@ -1,0 +1,103 @@
+---
+import Icon from './Icon.astro';
+import { LICENSES, getContact, getServices, hoursLines, serviceHref, telHref } from '../lib/api';
+
+const [contact, services] = await Promise.all([getContact(), getServices()]);
+const year = new Date().getFullYear();
+
+const quickLinks = [
+  { name: 'Home', href: '/preview' },
+  { name: 'About Us', href: '/preview/about' },
+  { name: 'Services', href: '/preview/services' },
+  { name: 'Contact', href: '/preview/contact' },
+];
+
+const social = [
+  { name: 'Facebook', icon: 'facebook', href: 'https://www.facebook.com/share/1ARaJi2Msq/?mibextid=wwXIfr' },
+  { name: 'Instagram', icon: 'instagram', href: 'https://www.instagram.com/livingstonecontractorsllc' },
+] as const;
+---
+
+<footer class="relative overflow-hidden bg-ink text-cream/70">
+  <!-- Roof line from the logo, drawn across the top edge. -->
+  <svg class="pointer-events-none absolute -top-px left-0 h-24 w-full text-primary-500/25" viewBox="0 0 1200 96" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M430 95 L600 8 L770 95" fill="none" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke" />
+  </svg>
+
+  <div class="container-site relative pb-10 pt-24">
+    <div class="grid gap-14 lg:grid-cols-[1.3fr_1fr_1fr_1.2fr] lg:gap-10">
+      <div class="max-w-sm">
+        <img src="/images/brand/logo-horizontal-white.webp" alt="Living Stone Contractors" width="640" height="254" class="h-14 w-auto" loading="lazy" />
+        <p class="mt-6 text-[0.95rem] leading-relaxed">
+          Specialized in home remodeling, improvement, and commercial renovations, transforming spaces into functional,
+          modern, and durable places with premium materials and reliable service.
+        </p>
+        <div class="mt-8 flex gap-3">
+          {
+            social.map((s) => (
+              <a
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={s.name}
+                class="grid h-11 w-11 place-items-center rounded-full border border-cream/15 text-cream transition-colors hover:border-primary-500 hover:bg-primary-600"
+              >
+                <Icon name={s.icon} size={20} />
+              </a>
+            ))
+          }
+        </div>
+      </div>
+
+      <div>
+        <h2 class="text-xs font-semibold uppercase tracking-[0.2em] text-cream">Quick Links</h2>
+        <ul class="mt-6 space-y-3">
+          {quickLinks.map((l) => <li><a href={l.href} class="transition-colors hover:text-cream">{l.name}</a></li>)}
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-xs font-semibold uppercase tracking-[0.2em] text-cream">Our Services</h2>
+        <ul class="mt-6 space-y-3">
+          {services.map((s) => <li><a href={serviceHref(s)} class="capitalize transition-colors hover:text-cream">{s.title.toLowerCase()}</a></li>)}
+        </ul>
+        <h2 class="mt-10 text-xs font-semibold uppercase tracking-[0.2em] text-cream">Hours</h2>
+        <ul class="mt-4 space-y-1.5 text-[0.95rem]">
+          {hoursLines(contact.hours).map((line) => <li>{line}</li>)}
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-xs font-semibold uppercase tracking-[0.2em] text-cream">Contact Us</h2>
+        <ul class="mt-6 space-y-4">
+          <li>
+            <a href={telHref(contact.phone)} class="flex items-center gap-3 text-cream transition-colors hover:text-primary-300">
+              <Icon name="phone" size={18} class="text-primary-400" />{contact.phone}
+            </a>
+          </li>
+          <li>
+            <a href={`mailto:${contact.email}`} class="flex items-center gap-3 break-all transition-colors hover:text-cream">
+              <Icon name="mail" size={18} class="shrink-0 text-primary-400" />{contact.email}
+            </a>
+          </li>
+          <li class="flex items-center gap-3"><Icon name="pin" size={18} class="text-primary-400" />{contact.address}</li>
+        </ul>
+        <dl class="mt-8 grid grid-cols-2 gap-3">
+          {
+            LICENSES.map((l) => (
+              <div class="rounded-md border border-cream/10 px-4 py-3">
+                <dt class="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-cream/50">{l.label} License</dt>
+                <dd class="mt-1 font-semibold tabular-nums text-cream">#{l.number}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </div>
+
+    <div class="mt-20 flex flex-col gap-3 border-t border-cream/10 pt-8 text-sm text-cream/45 md:flex-row md:items-center md:justify-between">
+      <p>&copy; {year} Living Stone Contractors, LLC. All rights reserved.</p>
+      <p>Building Trust. Delivering Excellence.</p>
+    </div>
+  </div>
+</footer>

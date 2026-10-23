@@ -1,0 +1,79 @@
+---
+import Measure from './Measure.astro';
+import { cld, cldSrcset } from '../lib/api';
+
+export interface Props {
+  eyebrow: string;
+  title: string;
+  lead?: string;
+  image?: string;
+  imageAlt?: string;
+  measure?: { start?: string; label?: string; end?: string };
+}
+
+const { eyebrow, title, lead, image, imageAlt = '', measure } = Astro.props;
+---
+
+<section class="pt-12 md:pt-20">
+  <div class="container-site">
+    <div class="grid gap-8 lg:grid-cols-[1.3fr_1fr] lg:items-end lg:gap-16">
+      <div>
+        <p class="eyebrow page-in">{eyebrow}</p>
+        <h1 class="mt-6 !text-[2.4rem] sm:!text-5xl lg:!text-[3.75rem]">
+          <span class="line"><span class="page-in" style="--i:1">{title}</span></span>
+        </h1>
+      </div>
+      {lead && <p class="page-in text-lg leading-relaxed text-secondary-600 lg:pb-2" style="--i:2">{lead}</p>}
+    </div>
+    <slot />
+    <Measure class="mt-12 md:mt-16" {...measure} />
+    {
+      image && (
+        <figure class="rise mt-4 overflow-hidden rounded-lg" style="--delay:200ms">
+          <img
+            src={cld(image, 1600)}
+            srcset={cldSrcset(image, [800, 1200, 1600, 2200])}
+            sizes="(min-width: 1280px) 1200px, 100vw"
+            alt={imageAlt}
+            class="aspect-[4/3] w-full object-cover sm:aspect-[21/9]"
+            fetchpriority="high"
+          />
+        </figure>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.08em;
+  }
+  .line > span {
+    display: inline-block;
+  }
+  .page-in {
+    opacity: 0;
+    transform: translateY(0.5em);
+    animation: page-rise 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: calc(0.2s + var(--i, 0) * 0.1s);
+  }
+  h1 .page-in {
+    opacity: 1;
+    transform: translateY(105%);
+  }
+  @keyframes page-rise {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .page-in {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
