@@ -1,41 +1,16 @@
 ---
-// Process section: a house elevation that is surveyed, planned, permitted, framed, and finished
-// as the visitor scrolls through the five steps.
+// Process section: a commercial building goes from survey to finished facade as the visitor
+// scrolls through the steps. The 3D model loads only when the section is close.
 export interface Props {
   steps: string[];
 }
 
 const { steps } = Astro.props;
-const n = steps.length;
-
-const L = 180;
-const R = 620;
-const EAVE = 250;
-const BASE = 470;
-const roofY = (x: number) => (x <= 400 ? EAVE - ((x - 160) / 240) * 130 : EAVE - ((640 - x) / 240) * 130);
-
-const studs: number[] = [];
-for (let x = L + 16; x < R; x += 24) studs.push(x);
-const webs: number[] = [];
-for (let x = 220; x <= 580; x += 40) webs.push(x);
-const hatch: number[] = [];
-for (let x = 50; x < 760; x += 18) hatch.push(x);
-
-const windows = [
-  { x: 220, y: 280 },
-  { x: 360, y: 280 },
-  { x: 500, y: 280 },
-  { x: 220, y: 380 },
-  { x: 500, y: 380 },
-];
-
-// Stage indexes follow the five process steps.
-const S = { survey: 0, plan: 1, permit: 2, build: 3, finish: Math.max(4, n - 1) };
 ---
 
-<section class="seq relative" style={`--steps:${n}`} data-seq>
+<section class="seq relative" style={`--steps:${steps.length}`} data-seq>
   <div class="sticky top-0 flex min-h-[100svh] items-center py-24">
-    <div class="container-site grid w-full gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-16">
+    <div class="container-site grid w-full gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:items-center lg:gap-12">
       <div>
         <span class="eyebrow">How we work</span>
         <h2 class="mt-5 max-w-md">From the first visit to the final inspection.</h2>
@@ -45,152 +20,44 @@ const S = { survey: 0, plan: 1, permit: 2, build: 3, finish: Math.max(4, n - 1) 
               <li class="seq-step flex items-baseline gap-5 border-b border-ink/10 py-4" data-seq-step={i}>
                 <span class="w-7 shrink-0 text-sm font-semibold tabular-nums">{String(i + 1).padStart(2, '0')}</span>
                 <span class="text-lg font-semibold leading-snug">{step}</span>
+                <span class="seq-bar" aria-hidden="true"><span></span></span>
               </li>
             ))
           }
         </ol>
       </div>
 
-      <svg class="drawing w-full" viewBox="30 36 740 520" role="img" aria-label="A house drawing built up in stages: site survey, plans, permit, framing, and finished home">
-        <!-- Site -->
-        <g class="ink thin">
-          {hatch.map((x) => <path d={`M${x} 512 l-10 14`} pathLength="1" data-at={S.survey} data-range="0.15 0.6" />)}
-          <path d="M40 496 H760" pathLength="1" data-at={S.survey} data-range="0 0.45" class="ink" />
-        </g>
-        <g class="dim">
-          <path d={`M${L} 540 H${R} M${L} 532 v16 M${R} 532 v16`} pathLength="1" data-at={S.survey} data-range="0.35 0.9" />
-          <path d={`M690 120 V${BASE} M682 120 h16 M682 ${BASE} h16`} pathLength="1" data-at={S.survey} data-range="0.5 1" />
-          <path d={`M${L - 8} ${BASE + 8} l16 -16 m0 16 l-16 -16 M${R - 8} ${BASE + 8} l16 -16 m0 16 l-16 -16`} pathLength="1" data-at={S.survey} data-range="0.6 1" />
-        </g>
-
-        <!-- Plans: dashed blueprint outline, cleared once framing goes up -->
-        <g class="plan" data-fade={S.plan} data-range="0 0.6" data-out={S.build} data-out-range="0.5 1">
-          <rect x={L} y={EAVE} width={R - L} height={BASE - EAVE} />
-          <path d={`M160 ${EAVE} L400 120 L640 ${EAVE}`} />
-          <path d="M500 182 V140 H535 V194" />
-          {windows.map((w) => <rect x={w.x} y={w.y} width="80" height="60" />)}
-          <rect x="370" y="380" width="60" height="90" />
-        </g>
-
-        <!-- Permit: foundation poured and plans stamped -->
-        <rect class="foundation" x={L - 10} y={BASE} width={R - L + 20} height="26" data-fade={S.permit} data-range="0.1 0.6" />
-        <g class="stamp" transform="rotate(-8 660 70)" data-fade={S.permit} data-range="0.5 0.9">
-          <rect x="590" y="46" width="140" height="48" rx="3" />
-          <text x="660" y="77" text-anchor="middle">APPROVED</text>
-        </g>
-
-        <!-- Finish fills sit behind the framing lines -->
-        <rect class="fill-wall" x={L} y={EAVE} width={R - L} height={BASE - EAVE} data-fade={S.finish} data-range="0 0.45" />
-
-        <!-- Framing -->
-        <g class="ink thin">
-          {studs.map((x, i) => <path d={`M${x} ${BASE} V${EAVE}`} pathLength="1" data-at={S.build} data-range={`${(i / studs.length) * 0.45} ${(i / studs.length) * 0.45 + 0.2}`} />)}
-          <path d={`M${L} ${EAVE + 4} H${R}`} pathLength="1" data-at={S.build} data-range="0.45 0.6" />
-          {webs.map((x, i) => <path d={`M${x} ${EAVE} V${roofY(x)}`} pathLength="1" data-at={S.build} data-range={`${0.55 + i * 0.03} ${0.7 + i * 0.03}`} />)}
-        </g>
-
-        <path class="fill-chimney" d="M500 186 V140 H535 V200 Z" data-fade={S.finish} data-range="0.2 0.5" />
-        <path class="fill-roof" d={`M150 ${EAVE + 6} L400 112 L650 ${EAVE + 6} Z`} data-fade={S.finish} data-range="0.2 0.55" />
-        {windows.map((w, i) => <rect class="fill-glass" x={w.x} y={w.y} width="80" height="60" data-fade={S.finish} data-range={`${0.4 + i * 0.05} ${0.6 + i * 0.05}`} />)}
-        <rect class="fill-door" x="370" y="380" width="60" height="90" data-fade={S.finish} data-range="0.55 0.75" />
-
-        <!-- Final outlines -->
-        <g class="ink">
-          <path d={`M${L} ${BASE} V${EAVE} H${R} V${BASE}`} pathLength="1" data-at={S.build} data-range="0.65 0.95" />
-          <path d={`M150 ${EAVE + 6} L400 112 L650 ${EAVE + 6}`} pathLength="1" data-at={S.build} data-range="0.75 1" />
-          <path d="M500 186 V140 H535 V200" pathLength="1" data-at={S.finish} data-range="0.2 0.4" />
-          {windows.map((w, i) => <path d={`M${w.x} ${w.y} h80 v60 h-80 Z M${w.x + 40} ${w.y} v60 M${w.x} ${w.y + 30} h80`} pathLength="1" data-at={S.finish} data-range={`${0.4 + i * 0.05} ${0.65 + i * 0.05}`} />)}
-          <path d="M370 470 V380 H430 V470 M418 428 h-6" pathLength="1" data-at={S.finish} data-range="0.55 0.8" />
-        </g>
-
-        <g class="check">
-          <circle cx="720" cy="190" r="26" pathLength="1" data-at={S.finish} data-range="0.75 0.95" />
-          <path d="M707 191 l9 9 l18 -19" pathLength="1" data-at={S.finish} data-range="0.85 1" />
-        </g>
-      </svg>
+      <div class="stage" data-stage>
+        <canvas data-canvas role="img" aria-label="3D model of a commercial building constructed step by step: site survey, design, foundation, steel frame, and finished facade"></canvas>
+      </div>
     </div>
   </div>
 </section>
 
 <style>
   .seq {
-    height: calc(var(--steps) * 70svh + 100svh);
+    height: calc(var(--steps) * 75svh + 100svh);
   }
-
-  .drawing {
-    max-height: 72svh;
-    overflow: visible;
+  .stage {
+    position: relative;
+    height: min(72svh, 44rem);
   }
-  [data-at] {
-    fill: none;
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-  }
-  .ink {
-    stroke: #1f2117;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    fill: none;
-  }
-  .ink.thin {
-    stroke-width: 1;
-    stroke: rgb(31 33 23 / 0.55);
-  }
-  .dim {
-    stroke: #5a7841;
-    stroke-width: 1;
-    fill: none;
-  }
-  .plan {
-    fill: none;
-    stroke: #6b8f4e;
-    stroke-width: 1.25;
-    stroke-dasharray: 7 6;
+  .stage canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     opacity: 0;
+    transition: opacity 1s ease;
+    /* Site lines fade out instead of being cut at the canvas edge. */
+    mask-image: radial-gradient(ellipse 58% 58% at 52% 50%, #000 60%, transparent 100%);
   }
-  .foundation {
-    fill: #8a8478;
-    opacity: 0;
-  }
-  .stamp {
-    opacity: 0;
-    fill: none;
-    stroke: #5a7841;
-    stroke-width: 2;
-  }
-  .stamp text {
-    fill: #5a7841;
-    stroke: none;
-    font: 700 18px 'Montserrat Variable', sans-serif;
-    letter-spacing: 0.24em;
-  }
-  .fill-wall {
-    fill: #e5ddd2;
-    opacity: 0;
-  }
-  .fill-roof,
-  .fill-chimney {
-    fill: #1f2117;
-    opacity: 0;
-  }
-  .fill-glass {
-    fill: #cfdcc4;
-    opacity: 0;
-  }
-  .fill-door {
-    fill: #6b8f4e;
-    opacity: 0;
-  }
-  .check {
-    stroke: #6b8f4e;
-    stroke-width: 2.5;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    fill: none;
+  .stage.is-ready canvas {
+    opacity: 1;
   }
 
   .seq-step {
+    position: relative;
     color: rgb(31 33 23 / 0.35);
     transition: color 0.4s ease;
   }
@@ -204,14 +71,28 @@ const S = { survey: 0, plan: 1, permit: 2, build: 3, finish: Math.max(4, n - 1) 
   .seq-step.is-done span:first-child {
     color: #5a7841;
   }
+  .seq-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+  }
+  .seq-bar span {
+    display: block;
+    height: 100%;
+    background: #6b8f4e;
+    transform: scaleX(var(--p, 0));
+    transform-origin: left;
+  }
 
   @media (max-width: 1023px) {
     .seq {
-      height: calc(var(--steps) * 60svh + 100svh);
+      height: calc(var(--steps) * 65svh + 100svh);
     }
-    .drawing {
+    .stage {
       order: -1;
-      max-height: 40svh;
+      height: 42svh;
     }
     .seq h2 {
       display: none;
@@ -219,58 +100,45 @@ const S = { survey: 0, plan: 1, permit: 2, build: 3, finish: Math.max(4, n - 1) 
     .seq-step {
       padding-block: 0.6rem;
     }
-    .seq-step span:last-child {
+    .seq-step span:nth-child(2) {
       font-size: 1rem;
     }
   }
 </style>
 
 <script>
+  import type { BuildingScene } from '../scripts/building/engine';
+
   const root = document.querySelector<HTMLElement>('[data-seq]');
   if (root) {
-    const items = [...root.querySelectorAll<SVGElement>('[data-at], [data-fade]')].map((el) => {
-      const [a, b] = (el.dataset.range ?? '0 1').split(' ').map(Number);
-      const [oa, ob] = (el.dataset.outRange ?? '0 1').split(' ').map(Number);
-      return {
-        el,
-        draw: el.dataset.at !== undefined,
-        stage: Number(el.dataset.at ?? el.dataset.fade),
-        a,
-        b,
-        out: el.dataset.out !== undefined ? Number(el.dataset.out) : null,
-        oa,
-        ob,
-      };
-    });
+    const stage = root.querySelector<HTMLElement>('[data-stage]')!;
+    const canvas = root.querySelector<HTMLCanvasElement>('[data-canvas]')!;
     const stepEls = [...root.querySelectorAll<HTMLElement>('[data-seq-step]')];
     const total = stepEls.length;
     const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
-    const local = (P: number, stage: number, a: number, b: number) => clamp01((P - stage - a) / Math.max(0.001, b - a));
+    let scene: BuildingScene | null = null;
+    let stages = 5;
+    let progress = 0;
 
-    const render = (P: number) => {
-      for (const it of items) {
-        const t = local(P, it.stage, it.a, it.b);
-        if (it.draw) it.el.style.strokeDashoffset = String(1 - t);
-        else {
-          const out = it.out === null ? 0 : local(P, it.out, it.oa, it.ob);
-          it.el.style.opacity = String(t * (1 - out));
-        }
-      }
+    const render = () => {
+      const P = progress * total;
       const active = Math.min(total - 1, Math.floor(P));
       stepEls.forEach((el, i) => {
         el.classList.toggle('is-active', i === active && P > 0.02);
         el.classList.toggle('is-done', i < active);
+        el.style.setProperty('--p', String(clamp01(P - i)));
       });
+      // The model always has five build stages; map however many steps the admin lists onto them.
+      scene?.setProgress(progress * stages);
     };
 
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let frame = 0;
     const update = () => {
       frame = 0;
       const rect = root.getBoundingClientRect();
       const span = rect.height - window.innerHeight;
-      const progress = clamp01(-rect.top / Math.max(1, span));
-      render(reduced ? total : progress * total * 1.04);
+      progress = clamp01((-rect.top / Math.max(1, span)) * 1.04);
+      render();
     };
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(update);
@@ -278,5 +146,22 @@ const S = { survey: 0, plan: 1, permit: 2, build: 3, finish: Math.max(4, n - 1) 
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
     update();
+
+    const lazy = new IntersectionObserver(
+      async ([entry]) => {
+        if (!entry.isIntersecting) return;
+        lazy.disconnect();
+        const [{ createBuildingScene }, { STAGES }] = await Promise.all([
+          import('../scripts/building/engine'),
+          import('../scripts/building/model'),
+        ]);
+        stages = STAGES;
+        scene = createBuildingScene(canvas, stage);
+        stage.classList.add('is-ready');
+        render();
+      },
+      { rootMargin: '800px 0px' },
+    );
+    lazy.observe(root);
   }
 </script>
