@@ -1,0 +1,286 @@
+---
+import MainLayout from '../../renew/layouts/MainLayout.astro';
+import BrandMark from '../../renew/components/BrandMark.astro';
+import BuildSequence from '../../renew/components/BuildSequence.astro';
+import CTABand from '../../renew/components/CTABand.astro';
+import Icon from '../../renew/components/Icon.astro';
+import Measure from '../../renew/components/Measure.astro';
+import {
+  LICENSES,
+  cld,
+  cldSrcset,
+  getContact,
+  getHome,
+  getServices,
+  getTestimonials,
+  processSteps,
+  serviceHref,
+  serviceLists,
+  splitFeatureTitle,
+  telHref,
+  titleCase,
+} from '../../renew/lib/api';
+
+const [home, services, testimonials, contact] = await Promise.all([getHome(), getServices(), getTestimonials(), getContact()]);
+const featured = services.filter((s) => s.featured);
+const showcase = featured.length ? featured : services;
+const residential = services.find((s) => /resid/i.test(s.title));
+const steps = processSteps(services);
+
+const features = [
+  { icon: 'shield', ...splitFeatureTitle(home.feature1Title), text: home.feature1Description },
+  { icon: 'tag', ...splitFeatureTitle(home.feature2Title), text: home.feature2Description },
+  { icon: 'team', ...splitFeatureTitle(home.feature3Title), text: home.feature3Description },
+] as const;
+
+const [mhic, commercial] = LICENSES;
+---
+
+<MainLayout
+  title="Living Stone Contractors | Home Remodeling & Commercial Renovations in Maryland"
+  description="Home remodeling and commercial renovations in Maryland and the DMV. Kitchens, baths, basements, office build-outs, and tenant improvements. Free estimates."
+>
+  <!-- Hero -->
+  <section class="pt-10 md:pt-16">
+    <div class="container-site">
+      <div class="grid gap-10 lg:grid-cols-[1.35fr_1fr] lg:items-end lg:gap-16">
+        <div>
+          <div class="flex items-center gap-4">
+            <BrandMark class="h-11 w-11" />
+            <p class="hero-in text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-secondary-500">Residential & Commercial · Maryland & DMV</p>
+          </div>
+          <h1 class="mt-8">
+            <span class="line"><span class="hero-in" style="--i:1">{home.heroTitle}.</span></span>
+            <span class="line"><span class="hero-in text-primary-600" style="--i:2">{home.heroSubtitle}.</span></span>
+          </h1>
+        </div>
+        <div class="lg:pb-3">
+          <p class="hero-in text-lg leading-relaxed text-secondary-600" style="--i:3">
+            {home.heroDescription} Home remodeling, home improvement, and commercial renovations, managed from first walkthrough to final inspection.
+          </p>
+          <div class="hero-in mt-8 flex flex-col gap-3 sm:flex-row" style="--i:4">
+            <a href="/preview/contact" class="btn btn-primary">
+              Get a Free Estimate
+              <Icon name="arrow" size={18} />
+            </a>
+            <a href={telHref(contact.phone)} class="btn btn-ghost">
+              <Icon name="phone" size={18} />
+              {contact.phone}
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <Measure class="mt-14 md:mt-20" start={`MHIC #${mhic.number}`} label="Licensed & insured" end={`Commercial #${commercial.number}`} />
+
+      <figure class="hero-photo rise relative mt-4 overflow-hidden rounded-lg" style="--delay:250ms" data-parallax>
+        <img
+          src={cld(home.heroImage, 1600)}
+          srcset={cldSrcset(home.heroImage, [800, 1200, 1600, 2200])}
+          sizes="(min-width: 1280px) 1200px, 100vw"
+          alt="Living Stone Contractors crew renovating a school gymnasium"
+          class="aspect-[4/5] w-full object-cover sm:aspect-[16/9] lg:aspect-[21/9]"
+          fetchpriority="high"
+        />
+        <figcaption class="absolute bottom-0 left-0 m-4 rounded bg-cream/95 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-ink">
+          Commercial renovation · School facility
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- Services -->
+  <section class="section" id="services">
+    <div class="container-site">
+      <header class="grid gap-6 lg:grid-cols-2 lg:items-end">
+        <div>
+          <span class="eyebrow reveal">What we do</span>
+          <h2 class="reveal mt-5" style="--delay:60ms">Residential and commercial, built to the same standard.</h2>
+        </div>
+        <p class="lead reveal lg:pb-2" style="--delay:120ms">
+          One team for homeowners, property owners, businesses, and general contractors across Maryland and the DMV.
+        </p>
+      </header>
+
+      <div class="mt-16 grid gap-24 md:mt-24 md:gap-32">
+        {
+          showcase.map((service, i) => {
+            const lists = serviceLists(service.content).filter((g) => !/why choose|process/i.test(g.heading)).slice(0, 2);
+            const name = titleCase(service.title);
+            return (
+              <article class:list={['grid items-start gap-10 lg:grid-cols-2 lg:gap-16', { 'lg:[&>*:first-child]:order-2': i % 2 === 1 }]}>
+                <a href={serviceHref(service)} class="rise group relative block overflow-hidden rounded-lg" aria-label={`${name} services`}>
+                  <img
+                    src={cld(service.image, 1100)}
+                    srcset={cldSrcset(service.image, [600, 900, 1200])}
+                    sizes="(min-width: 1024px) 45vw, 92vw"
+                    alt={`${name} project by Living Stone Contractors`}
+                    class="aspect-[5/4] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                    loading="lazy"
+                  />
+                </a>
+
+                <div class="lg:pt-4">
+                  <div class="reveal flex items-center gap-3 text-sm font-semibold text-primary-700">
+                    <span class="tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+                    <span class="h-px w-8 bg-current"></span>
+                    <Icon name={/commerc/i.test(service.title) ? 'building' : 'home'} size={18} />
+                  </div>
+                  <h3 class="reveal mt-4 text-3xl md:text-[2.5rem] md:leading-tight" style="--delay:60ms">{name}</h3>
+                  <p class="reveal mt-5 text-lg leading-relaxed text-secondary-600" style="--delay:100ms">{service.description}</p>
+
+                  {lists.map((group) => (
+                    <div class="mt-9">
+                      <p class="reveal text-xs font-semibold uppercase tracking-[0.18em] text-secondary-500">{group.heading}</p>
+                      <ul class="lay mt-4 grid border-t border-ink/10 sm:grid-cols-2 sm:gap-x-8">
+                        {group.items.map((item, j) => (
+                          <li class="flex items-center gap-3 border-b border-ink/10 py-3 text-[0.97rem] text-ink" style={`--i:${j}`}>
+                            <span class="h-1.5 w-1.5 shrink-0 bg-primary-600"></span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+
+                  <a href={serviceHref(service)} class="link-arrow reveal mt-9">
+                    View {name.toLowerCase()} services
+                    <Icon name="arrow" size={18} />
+                  </a>
+                </div>
+              </article>
+            );
+          })
+        }
+      </div>
+    </div>
+  </section>
+
+  <BuildSequence steps={steps} phone={contact.phone} />
+
+  <!-- Why choose -->
+  <section class="section">
+    <div class="container-site">
+      <Measure label="Why Living Stone" />
+      <div class="mt-14 grid gap-14 lg:grid-cols-[1fr_1.1fr] lg:items-center lg:gap-20">
+        {
+          residential?.image && (
+            <figure class="rise relative overflow-hidden rounded-lg">
+              <img
+                src={cld(residential.image, 1000)}
+                srcset={cldSrcset(residential.image, [600, 1000])}
+                sizes="(min-width: 1024px) 40vw, 92vw"
+                alt="Living Stone Contractors on a residential job site in Maryland"
+                class="aspect-[4/5] w-full object-cover"
+                loading="lazy"
+              />
+            </figure>
+          )
+        }
+
+        <div>
+          <h2 class="reveal">{home.whyChooseTitle}</h2>
+          <p class="lead reveal mt-6" style="--delay:80ms">{home.whyChooseDescription}</p>
+
+          <ul class="lay mt-10 border-t border-ink/10">
+            {
+              features.map((f, i) => (
+                <li class="flex gap-5 border-b border-ink/10 py-6" style={`--i:${i}`}>
+                  <Icon name={f.icon} size={26} class="mt-0.5 shrink-0 text-primary-600" />
+                  <div>
+                    <h3 class="text-lg md:text-xl">{f.title}</h3>
+                    <p class="mt-1.5 text-secondary-600">{f.text}</p>
+                    {f.detail && <p class="mt-2 text-sm font-semibold tabular-nums text-primary-700">{f.detail}</p>}
+                  </div>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  {
+    testimonials.length > 0 && (
+      <section class="pb-20 md:pb-28">
+        <div class="container-site">
+          <Measure label="Client reviews" />
+          <h2 class="reveal mt-14 max-w-xl">What our clients say.</h2>
+          <div class="mt-12 grid gap-px overflow-hidden rounded-lg border border-ink/10 bg-ink/10 md:grid-cols-3">
+            {testimonials.slice(0, 3).map((t, i) => (
+              <figure class="reveal flex flex-col bg-cream p-8 md:p-10" style={`--delay:${i * 90}ms`}>
+                <Icon name="quote" size={28} class="text-primary-600" />
+                <blockquote class="mt-6 flex-1 text-lg leading-relaxed text-ink">{t.content}</blockquote>
+                <figcaption class="mt-8 flex items-center justify-between gap-4 text-sm">
+                  <span class="font-semibold">
+                    {t.name}
+                    {t.company && <span class="block font-normal text-secondary-500">{t.company}</span>}
+                  </span>
+                  <span class="text-primary-700" aria-label={`${t.rating || 5} out of 5 stars`}>{'★'.repeat(t.rating || 5)}</span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <CTABand />
+</MainLayout>
+
+<style>
+  h1 .line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.06em;
+  }
+  h1 .line > span {
+    display: inline-block;
+  }
+  .hero-in {
+    opacity: 0;
+    transform: translateY(0.5em);
+    animation: hero-rise 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: calc(0.35s + var(--i, 0) * 0.1s);
+  }
+  h1 .hero-in {
+    transform: translateY(105%);
+    opacity: 1;
+  }
+  @keyframes hero-rise {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .hero-photo img {
+    scale: 1.1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-photo img {
+      scale: 1;
+    }
+    .hero-in {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  // The hero photo drifts slightly slower than the page, like looking up at a structure.
+  const photo = document.querySelector<HTMLElement>('[data-parallax] img');
+  if (photo && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const y = Math.min(window.scrollY, window.innerHeight * 1.2);
+      photo.style.translate = `0 ${y * -0.05}px`;
+    };
+    window.addEventListener('scroll', () => frame || (frame = requestAnimationFrame(update)), { passive: true });
+  }
+</script>

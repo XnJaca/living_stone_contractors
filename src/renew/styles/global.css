@@ -1,0 +1,210 @@
+@import '@fontsource-variable/montserrat';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-cream text-ink font-sans antialiased;
+    font-feature-settings: 'ss01';
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading text-ink;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  h1 {
+    @apply text-[2.6rem] leading-[1.02] font-bold sm:text-6xl lg:text-[4.4rem];
+  }
+
+  h2 {
+    @apply text-3xl leading-[1.08] font-bold md:text-[2.9rem];
+  }
+
+  h3 {
+    @apply text-xl leading-snug font-semibold md:text-2xl;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    @apply bg-primary-500 text-white;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary-600;
+  }
+}
+
+@layer components {
+  .container-site {
+    @apply mx-auto w-full max-w-site px-4 sm:px-6 lg:px-8;
+  }
+
+  .section {
+    @apply py-20 md:py-28;
+  }
+
+  /* Short rule + label, echoing the line work of the logo. */
+  .eyebrow {
+    @apply inline-flex items-center gap-3 text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-primary-700;
+  }
+  .eyebrow::before {
+    content: '';
+    @apply h-px w-8 bg-current;
+  }
+  .eyebrow-light {
+    @apply text-primary-300;
+  }
+
+  .lead {
+    @apply text-lg leading-relaxed text-secondary-600 md:text-xl;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-6 py-3.5 text-[0.95rem] font-semibold transition-[background-color,color,border-color,transform] duration-200 ease-out active:scale-[0.97];
+  }
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700;
+  }
+  .btn-dark {
+    @apply bg-ink text-cream hover:bg-secondary-800;
+  }
+  .btn-ghost {
+    @apply border border-ink/20 text-ink hover:border-ink hover:bg-ink hover:text-cream;
+  }
+  .btn-ghost-light {
+    @apply border border-cream/30 text-cream hover:border-cream hover:bg-cream hover:text-ink;
+  }
+
+  .link-arrow {
+    @apply inline-flex items-center gap-2 font-semibold text-ink transition-colors hover:text-primary-700;
+  }
+  .link-arrow svg {
+    @apply transition-transform duration-200 ease-out;
+  }
+  .link-arrow:hover svg {
+    @apply translate-x-1;
+  }
+
+  .field {
+    @apply w-full rounded-md border border-ink/15 bg-white px-4 py-3 text-ink placeholder:text-secondary-400 transition-colors focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/20;
+  }
+  .label {
+    @apply mb-2 block text-sm font-semibold text-ink;
+  }
+
+  /* Rich text coming from the admin editor. */
+  .rich {
+    @apply text-[1.05rem] leading-relaxed text-secondary-700;
+  }
+  .rich > * + * {
+    @apply mt-5;
+  }
+  .rich h2 {
+    @apply mt-12 text-2xl md:text-3xl;
+  }
+  .rich h3 {
+    @apply mt-10 text-xl;
+  }
+  .rich h2:first-child,
+  .rich h3:first-child {
+    @apply mt-0;
+  }
+  .rich strong {
+    @apply font-semibold text-ink;
+  }
+  .rich ul {
+    @apply grid gap-x-8 gap-y-2.5 sm:grid-cols-2;
+  }
+  .rich ul li {
+    @apply relative pl-6;
+  }
+  .rich ul li::before {
+    content: '';
+    @apply absolute left-0 top-[0.7em] h-px w-3 bg-primary-600;
+  }
+  .rich ol {
+    @apply space-y-2.5;
+    counter-reset: step;
+  }
+  .rich ol li {
+    @apply relative pl-10;
+    counter-increment: step;
+  }
+  .rich ol li::before {
+    content: counter(step, decimal-leading-zero);
+    @apply absolute left-0 top-0 text-sm font-semibold text-primary-700;
+  }
+  .rich p:empty,
+  .rich p:has(> br:only-child) {
+    @apply hidden;
+  }
+  .rich a {
+    @apply font-semibold text-primary-700 underline underline-offset-4;
+  }
+}
+
+@layer utilities {
+  /* Construction reveals: content fades up, images rise like a wall going up,
+     dimension lines draw across, and lists are laid one piece at a time. */
+  .js .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--delay, 0ms);
+  }
+  .js .rise {
+    clip-path: inset(100% 0 0 0);
+    transition: clip-path 1.2s cubic-bezier(0.65, 0, 0.35, 1);
+    transition-delay: var(--delay, 0ms);
+  }
+  .js .rise > img {
+    transform: scale(1.08);
+    transition: transform 1.6s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--delay, 0ms);
+  }
+  .js .lay > * {
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: calc(var(--delay, 0ms) + var(--i, 0) * 70ms);
+  }
+  .js .reveal.is-in,
+  .js .lay.is-in > * {
+    opacity: 1;
+    transform: none;
+  }
+  .js .rise.is-in {
+    clip-path: inset(0 0 0 0);
+  }
+  .js .rise.is-in > img {
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .js .reveal,
+    .js .lay > *,
+    .js .rise,
+    .js .rise > img {
+      opacity: 1;
+      transform: none;
+      clip-path: none;
+      transition: none;
+    }
+  }
+}

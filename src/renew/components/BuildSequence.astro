@@ -1,0 +1,179 @@
+---
+// Process section: a commercial building goes from survey to finished facade as the visitor
+// scrolls through the steps. The 3D model loads only when the section is close.
+import { LICENSES } from '../lib/api';
+
+export interface Props {
+  steps: string[];
+  phone: string;
+}
+
+const { steps, phone } = Astro.props;
+const licenses = LICENSES.map((l) => `${l.label} #${l.number}`).join('  ·  ');
+---
+
+<section class="seq relative" style={`--steps:${steps.length}`} data-seq data-phone={phone} data-licenses={licenses}>
+  <div class="sticky top-0 flex min-h-[100svh] items-center py-24">
+    <div class="container-site grid w-full gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:items-center lg:gap-12">
+      <div>
+        <span class="eyebrow">How we work</span>
+        <h2 class="mt-5 max-w-md">From the first visit to the final inspection.</h2>
+        <ol class="mt-10 border-t border-ink/10">
+          {
+            steps.map((step, i) => (
+              <li class="seq-step flex items-baseline gap-5 border-b border-ink/10 py-4" data-seq-step={i}>
+                <span class="w-7 shrink-0 text-sm font-semibold tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+                <span class="text-lg font-semibold leading-snug">{step}</span>
+                <span class="seq-bar" aria-hidden="true"><span></span></span>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+
+      <div class="stage" data-stage>
+        <canvas data-canvas role="img" aria-label="3D model of a commercial building constructed step by step: site survey, design, foundation, steel frame, and finished facade"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .seq {
+    height: calc(var(--steps) * 75svh + 100svh);
+  }
+  .stage {
+    position: relative;
+    height: min(72svh, 44rem);
+  }
+  .stage canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1s ease;
+    /* Site lines fade out instead of being cut at the canvas edge. */
+    mask-image: radial-gradient(ellipse 58% 58% at 52% 50%, #000 60%, transparent 100%);
+  }
+  .stage.is-ready canvas {
+    opacity: 1;
+  }
+
+  .seq-step {
+    position: relative;
+    color: rgb(31 33 23 / 0.35);
+    transition: color 0.4s ease;
+  }
+  .seq-step.is-done {
+    color: rgb(31 33 23 / 0.7);
+  }
+  .seq-step.is-active {
+    color: #1f2117;
+  }
+  .seq-step.is-active span:first-child,
+  .seq-step.is-done span:first-child {
+    color: #5a7841;
+  }
+  .seq-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+  }
+  .seq-bar span {
+    display: block;
+    height: 100%;
+    background: #6b8f4e;
+    transform: scaleX(var(--p, 0));
+    transform-origin: left;
+  }
+
+  @media (max-width: 1023px) {
+    .seq {
+      height: calc(var(--steps) * 65svh + 100svh);
+    }
+    .stage {
+      order: -1;
+      height: 42svh;
+    }
+    .seq h2 {
+      display: none;
+    }
+    .seq-step {
+      padding-block: 0.6rem;
+    }
+    .seq-step span:nth-child(2) {
+      font-size: 1rem;
+    }
+  }
+</style>
+
+<script>
+  import type { BuildingScene } from '../scripts/building/engine';
+
+  const root = document.querySelector<HTMLElement>('[data-seq]');
+  if (root) {
+    const stage = root.querySelector<HTMLElement>('[data-stage]')!;
+    const canvas = root.querySelector<HTMLCanvasElement>('[data-canvas]')!;
+    const stepEls = [...root.querySelectorAll<HTMLElement>('[data-seq-step]')];
+    const total = stepEls.length;
+    const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+    let scene: BuildingScene | null = null;
+    let stages = 5;
+    let progress = 0;
+
+    const render = () => {
+      const P = progress * total;
+      const active = Math.min(total - 1, Math.floor(P));
+      stepEls.forEach((el, i) => {
+        el.classList.toggle('is-active', i === active && P > 0.02);
+        el.classList.toggle('is-done', i < active);
+        el.style.setProperty('--p', String(clamp01(P - i)));
+      });
+      // The model always has five build stages; map however many steps the admin lists onto them.
+      scene?.setProgress(progress * stages);
+    };
+
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const rect = root.getBoundingClientRect();
+      const span = rect.height - window.innerHeight;
+      progress = clamp01((-rect.top / Math.max(1, span)) * 1.04);
+      render();
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    update();
+
+    const lazy = new IntersectionObserver(
+      async ([entry]) => {
+        if (!entry.isIntersecting) return;
+        lazy.disconnect();
+        // The sign is painted on a canvas, so the logo and brand font must be ready first.
+        const logo = new Image();
+        logo.src = '/images/brand/logo-horizontal-color.png';
+        const [{ createBuildingScene }, { STAGES }] = await Promise.all([
+          import('../scripts/building/engine'),
+          import('../scripts/building/model'),
+          logo.decode().catch(() => {}),
+          document.fonts.load('700 46px "Montserrat Variable"').catch(() => {}),
+        ]);
+        stages = STAGES;
+        const sign = logo.naturalWidth
+          ? { logo, phone: root.dataset.phone ?? '', licenses: root.dataset.licenses ?? '' }
+          : undefined;
+        scene = createBuildingScene(canvas, stage, sign);
+        stage.classList.add('is-ready');
+        render();
+      },
+      { rootMargin: '800px 0px' },
+    );
+    lazy.observe(root);
+  }
+</script>

@@ -1,0 +1,46 @@
+---
+import MainLayout from '../../renew/layouts/MainLayout.astro';
+import CTABand from '../../renew/components/CTABand.astro';
+import PageHero from '../../renew/components/PageHero.astro';
+import { LICENSES, cld, cldSrcset, getHome, getServices } from '../../renew/lib/api';
+
+const [home, services] = await Promise.all([getHome(), getServices()]);
+const portrait = services.find((s) => /resid/i.test(s.title))?.image;
+
+// The admin content repeats the page title as its first heading; the hero already shows it.
+const content = (home.aboutContent || '').replace(/^\s*<h2>[\s\S]*?<\/h2>/, '');
+---
+
+<MainLayout
+  title="About Living Stone Contractors | Maryland Remodeling & Commercial Contractor"
+  description="Licensed and insured Maryland contractor for commercial renovations and home remodeling, working with homeowners, businesses, and general contractors."
+>
+  <PageHero
+    eyebrow="About"
+    title={home.aboutTitle}
+    lead={home.aboutDescription}
+    measure={{ start: `MHIC #${LICENSES[0].number}`, label: 'Germantown, MD', end: `Commercial #${LICENSES[1].number}` }}
+  />
+
+  <section class="section pt-14 md:pt-20">
+    <div class="container-site grid gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
+      {
+        portrait && (
+          <figure class="rise overflow-hidden rounded-lg lg:sticky lg:top-28 lg:self-start">
+            <img
+              src={cld(portrait, 1000)}
+              srcset={cldSrcset(portrait, [600, 1000])}
+              sizes="(min-width: 1024px) 42vw, 92vw"
+              alt="Living Stone Contractors on a residential project in Maryland"
+              class="aspect-[4/5] w-full object-cover"
+              fetchpriority="high"
+            />
+          </figure>
+        )
+      }
+      <article class="rich reveal" set:html={content || '<p>Content coming soon.</p>'} />
+    </div>
+  </section>
+
+  <CTABand title="Ready to work with us?" text="Let's discuss your project and how we can help bring your vision to life." />
+</MainLayout>
