@@ -18,6 +18,8 @@ const {
   schema,
 } = Astro.props;
 
+// Preview deployments set NOINDEX=true so they never compete with the live site in search.
+const noindex = process.env.NOINDEX === 'true';
 const siteTitle = 'Living Stone Contractors';
 const fullTitle = title.includes(siteTitle) ? title : `${title} | ${siteTitle}`;
 const imageURL = new URL(image, Astro.site).href;
@@ -91,7 +93,7 @@ const business = {
 
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large'} />
     <link rel="canonical" href={canonicalURL} />
     <meta name="geo.region" content="US-MD" />
     <meta name="geo.placename" content={locality} />
