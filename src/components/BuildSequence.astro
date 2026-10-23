@@ -1,14 +1,18 @@
 ---
 // Process section: a commercial building goes from survey to finished facade as the visitor
 // scrolls through the steps. The 3D model loads only when the section is close.
+import { LICENSES } from '../lib/api';
+
 export interface Props {
   steps: string[];
+  phone: string;
 }
 
-const { steps } = Astro.props;
+const { steps, phone } = Astro.props;
+const licenses = LICENSES.map((l) => `${l.label} #${l.number}`).join('  ·  ');
 ---
 
-<section class="seq relative" style={`--steps:${steps.length}`} data-seq>
+<section class="seq relative" style={`--steps:${steps.length}`} data-seq data-phone={phone} data-licenses={licenses}>
   <div class="sticky top-0 flex min-h-[100svh] items-center py-24">
     <div class="container-site grid w-full gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:items-center lg:gap-12">
       <div>
@@ -151,12 +155,20 @@ const { steps } = Astro.props;
       async ([entry]) => {
         if (!entry.isIntersecting) return;
         lazy.disconnect();
+        // The sign is painted on a canvas, so the logo and brand font must be ready first.
+        const logo = new Image();
+        logo.src = '/images/brand/logo-horizontal-color.png';
         const [{ createBuildingScene }, { STAGES }] = await Promise.all([
           import('../scripts/building/engine'),
           import('../scripts/building/model'),
+          logo.decode().catch(() => {}),
+          document.fonts.load('700 46px "Montserrat Variable"').catch(() => {}),
         ]);
         stages = STAGES;
-        scene = createBuildingScene(canvas, stage);
+        const sign = logo.naturalWidth
+          ? { logo, phone: root.dataset.phone ?? '', licenses: root.dataset.licenses ?? '' }
+          : undefined;
+        scene = createBuildingScene(canvas, stage, sign);
         stage.classList.add('is-ready');
         render();
       },

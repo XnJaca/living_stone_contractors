@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { STAGES, buildingModel } from './model';
+import type { SignInfo } from './sign';
 
 export interface BuildingScene {
   setProgress(P: number): void;
@@ -8,7 +9,7 @@ export interface BuildingScene {
 }
 
 /** Renders the building and eases it toward the scroll position. */
-export function createBuildingScene(canvas: HTMLCanvasElement, host: HTMLElement): BuildingScene {
+export function createBuildingScene(canvas: HTMLCanvasElement, host: HTMLElement, sign?: SignInfo): BuildingScene {
   const small = window.matchMedia('(max-width: 767px)').matches;
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -42,7 +43,7 @@ export function createBuildingScene(canvas: HTMLCanvasElement, host: HTMLElement
   ground.receiveShadow = true;
   scene.add(ground);
 
-  const { build, jib, height } = buildingModel();
+  const { build, jib, height } = buildingModel(sign);
   scene.add(build.group);
 
   const camera = new THREE.PerspectiveCamera(28, 1, 0.5, 300);

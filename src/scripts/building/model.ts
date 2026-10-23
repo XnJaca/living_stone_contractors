@@ -1,11 +1,12 @@
 import * as THREE from 'three';
 import { Build, boxEdges, mat } from './kit';
+import { siteSign, type SignInfo } from './sign';
 
 // Three-story commercial building. Stages:
 // 0 site assessment, 1 design & planning, 2 permit & foundation, 3 construction, 4 final inspection.
 export const STAGES = 5;
 
-export function buildingModel() {
+export function buildingModel(sign?: SignInfo) {
   const b = new Build();
   const W = 9; // half width (x)
   const D = 5.5; // half depth (z)
@@ -43,6 +44,16 @@ export function buildingModel() {
   const stakes: THREE.Mesh[] = [];
   for (const x of xs) for (const z of zs) stakes.push(b.box(green, 0.12, 0.6, 0.12, x, 0, z));
   b.stagger(stakes, 0, 'rise', { t0: 0.55, t1: 1, span: 0.3 });
+
+  // Company sign at the front corner of the lot, angled toward the street view.
+  if (sign) {
+    const board = siteSign(sign);
+    board.position.set(11, 0, 11.5);
+    board.rotation.y = 0.6;
+    board.scale.setScalar(1.15);
+    b.group.add(board);
+    b.at(board, 0, 'rise', { t0: 0.7, t1: 1 });
+  }
 
   // Stage 1: the design as a line drawing ------------------------------------------------
   const planMat = new THREE.LineBasicMaterial({ color: 0x5a7841, transparent: true, opacity: 0.95 });
