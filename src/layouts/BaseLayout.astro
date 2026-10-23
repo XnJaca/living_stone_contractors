@@ -1,124 +1,178 @@
 ---
 import '../styles/global.css';
+import { LICENSES, SERVICE_AREA, getContact, getServices, serviceHref } from '../lib/api';
 
 export interface Props {
   title?: string;
   description?: string;
   image?: string;
   canonicalURL?: string;
+  schema?: Record<string, unknown>;
 }
 
 const {
-  title = 'Living Stone Contractors, LLC - Home Remodeling & Improvement Specialists',
-  description = 'Specialized in home remodeling, improvement, and commercial renovations, transforming spaces into functional, modern, and durable places. Technical expertise, premium materials, and reliable service that exceeds expectations.',
+  title = 'Living Stone Contractors | Home Remodeling & Commercial Renovations in Maryland',
+  description = 'Living Stone Contractors provides home remodeling, home improvement, and commercial renovations in Maryland and the DMV area. Licensed and insured. Free estimates.',
   image = '/images/og-image.png',
-  canonicalURL = new URL(Astro.url.pathname, Astro.site).href,
+  canonicalURL = new URL(Astro.url.pathname.replace(/\/$/, '') || '/', Astro.site).href,
+  schema,
 } = Astro.props;
 
-const siteTitle = 'Living Stone Contractors, LLC';
+const siteTitle = 'Living Stone Contractors';
 const fullTitle = title.includes(siteTitle) ? title : `${title} | ${siteTitle}`;
+const imageURL = new URL(image, Astro.site).href;
+
+const [contact, services] = await Promise.all([getContact(), getServices()]);
+const phoneDigits = contact.phone.replace(/\D/g, '').replace(/^1/, '');
+const [locality, regionZip = ''] = contact.address.split(',').map((s) => s.trim());
+const [region, postalCode] = regionZip.split(/\s+/);
+
+const business = {
+  '@context': 'https://schema.org',
+  '@type': 'GeneralContractor',
+  '@id': `${Astro.site}#business`,
+  name: 'Living Stone Contractors, LLC',
+  slogan: 'Building Trust. Delivering Excellence.',
+  description,
+  url: Astro.site?.href,
+  logo: new URL('/images/logo.png', Astro.site).href,
+  image: imageURL,
+  telephone: `+1-${phoneDigits.slice(0, 3)}-${phoneDigits.slice(3, 6)}-${phoneDigits.slice(6)}`,
+  email: contact.email,
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: locality,
+    addressRegion: region,
+    postalCode,
+    addressCountry: 'US',
+  },
+  areaServed: [{ '@type': 'State', name: 'Maryland' }, ...SERVICE_AREA.map((name) => ({ '@type': 'Place', name }))],
+  hasCredential: LICENSES.map((l) => ({
+    '@type': 'EducationalOccupationalCredential',
+    credentialCategory: 'license',
+    name: `${l.label} License #${l.number}`,
+  })),
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      opens: '08:00',
+      closes: '17:00',
+    },
+  ],
+  sameAs: [
+    'https://www.facebook.com/share/1ARaJi2Msq/',
+    'https://www.instagram.com/livingstonecontractorsllc',
+  ],
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Remodeling & Renovation Services',
+    itemListElement: services.map((s) => ({
+      '@type': 'Offer',
+      itemOffered: { '@type': 'Service', name: s.metaTitle?.split('|')[0].trim() || s.title, url: new URL(serviceHref(s), Astro.site).href },
+    })),
+  },
+};
 ---
 
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" class="no-js">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline>document.documentElement.classList.replace('no-js', 'js');</script>
 
-    <!-- Favicons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-
+    <meta name="theme-color" content="#1F2117" />
     <meta name="generator" content={Astro.generator} />
 
-    <!-- Primary Meta Tags -->
     <title>{fullTitle}</title>
-    <meta name="title" content={fullTitle} />
     <meta name="description" content={description} />
-    <meta name="keywords" content="home remodeling, home improvement, contractors, interior renovation, exterior renovation, kitchen remodeling, bathroom remodeling, masonry, roofing, siding, basement finishing" />
-    <meta name="author" content="Living Stone Contractors, LLC" />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href={canonicalURL} />
+    <meta name="geo.region" content="US-MD" />
+    <meta name="geo.placename" content={locality} />
 
-    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Living Stone Contractors" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={new URL(image, Astro.site)} />
+    <meta property="og:image" content={imageURL} />
 
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={canonicalURL} />
-    <meta property="twitter:title" content={fullTitle} />
-    <meta property="twitter:description" content={description} />
-    <meta property="twitter:image" content={new URL(image, Astro.site)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageURL} />
 
-    <!-- Fonts -->
-    <!-- Usando Montserrat como alternativa a Gotham Pro (fuente comercial) -->
-    <!-- TODO: Reemplazar con Gotham Pro cuando se obtenga la licencia -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="preconnect" href="https://res.cloudinary.com" />
 
-    <!-- Schema.org structured data -->
-    <script type="application/ld+json" is:inline set:html={JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "GeneralContractor",
-        "name": "Living Stone Contractors, LLC",
-        "description": "Specialized in home remodeling, improvement, and commercial renovations, transforming spaces into functional, modern, and durable places",
-        "url": "https://livingstonecontractors.com",
-        "logo": "https://livingstonecontractors.com/images/logo.png",
-        "image": "https://livingstonecontractors.com/images/og-image.png",
-        "address": {
-          "@type": "PostalAddress",
-          "addressCountry": "US"
-        },
-        "sameAs": [],
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "contactType": "Customer Service",
-          "telephone": "+1-123-456-7890",
-          "email": "lstonecontractors@gmail.com",
-          "availableLanguage": ["English", "Spanish"]
-        },
-        "areaServed": {
-          "@type": "State",
-          "name": "United States"
-        },
-        "priceRange": "$$",
-        "openingHoursSpecification": [
-          {
-            "@type": "OpeningHoursSpecification",
-            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-            "opens": "07:00",
-            "closes": "18:00"
-          }
-        ],
-        "hasOfferCatalog": {
-          "@type": "OfferCatalog",
-          "name": "Home Remodeling Services",
-          "itemListElement": [
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Interior Renovation" } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Exterior Renovation" } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Kitchen Remodeling" } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Bathroom Remodeling" } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Masonry Services" } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Roofing Services" } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Siding Installation" } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Basement Finishing" } }
-          ]
-        }
-      })} />
-    </script>
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(business)} />
+    {schema && <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />}
   </head>
   <body>
-    <slot />
+    <!-- Faint drafting columns behind the whole page; they draw down on load. -->
+    <div class="blueprint pointer-events-none fixed inset-0 z-0" aria-hidden="true">
+      <div class="container-site grid h-full grid-cols-2 md:grid-cols-4">
+        <span></span><span></span><span class="hidden md:block"></span><span class="hidden md:block"></span>
+      </div>
+    </div>
+    <div class="relative z-[1]">
+      <slot />
+    </div>
+
+    <script>
+      const els = document.querySelectorAll<HTMLElement>('.reveal, .rise, .lay, [data-measure]');
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            entry.target.classList.add('is-in');
+            io.unobserve(entry.target);
+          }
+        },
+        { rootMargin: '0px 0px -10% 0px' },
+      );
+      els.forEach((el) => io.observe(el));
+    </script>
   </body>
 </html>
+
+<style>
+  .blueprint span {
+    border-left: 1px solid rgb(31 33 23 / 0.045);
+    transform-origin: top;
+    animation: draw-down 1.8s cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
+  .blueprint span:last-child {
+    border-right: 1px solid rgb(31 33 23 / 0.045);
+  }
+  .blueprint span:nth-child(2) {
+    animation-delay: 0.12s;
+  }
+  .blueprint span:nth-child(3) {
+    animation-delay: 0.24s;
+  }
+  .blueprint span:nth-child(4) {
+    animation-delay: 0.36s;
+  }
+  @media (max-width: 767px) {
+    .blueprint span:nth-child(2) {
+      border-right: 1px solid rgb(31 33 23 / 0.045);
+    }
+  }
+  @keyframes draw-down {
+    from {
+      transform: scaleY(0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .blueprint span {
+      animation: none;
+    }
+  }
+</style>

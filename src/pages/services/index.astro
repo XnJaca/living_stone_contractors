@@ -1,78 +1,71 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import ServiceCard from '../../components/ServiceCard.astro';
+import CTABand from '../../components/CTABand.astro';
+import Icon from '../../components/Icon.astro';
+import PageHero from '../../components/PageHero.astro';
+import { cld, cldSrcset, getServices, serviceHref, serviceLists, titleCase } from '../../lib/api';
 
-// API URL - use PORT env var for same-server setup
-const API_URL = `http://localhost:${process.env.PORT || 3001}`;
-
-let sortedServices: any[] = [];
-
-try {
-  const res = await fetch(`${API_URL}/api/services`);
-  if (res.ok) {
-    const services = await res.json();
-    sortedServices = services.sort((a: any, b: any) => a.order - b.order);
-  }
-} catch (error) {
-  console.error('Error fetching services:', error);
-}
+const services = await getServices();
 ---
 
 <MainLayout
-  title="Our Services - Living Stone Contractors"
-  description="Comprehensive home renovation and construction services. Interior, exterior, roofing, masonry, kitchens, baths, basements, and siding."
+  title="Remodeling & Commercial Renovation Services in Maryland"
+  description="Residential remodeling and commercial renovation services in Maryland and the DMV: kitchens, baths, basements, additions, office build-outs, tenant improvements, metal stud framing, drywall, acoustical ceilings, painting, and flooring."
 >
-  <!-- Hero Section -->
-  <section class="relative py-24 bg-secondary-900">
-    <div class="absolute inset-0 bg-gradient-to-r from-black/70 to-black/50 z-10"></div>
-    <div
-      class="absolute inset-0 bg-cover bg-center"
-      style="background-image: url('/images/placeholders/services-hero.jpg');"
-    ></div>
+  <PageHero
+    eyebrow="Services"
+    title="What we build."
+    lead="Comprehensive and personalized solutions that transform your space into functional, modern, and durable places."
+    measure={{ start: 'Residential', label: 'Maryland & DMV', end: 'Commercial' }}
+  />
 
-    <div class="container-custom relative z-20 text-white text-center">
-      <h1 class="font-heading font-bold mb-6">Our Services</h1>
-      <p class="text-xl max-w-3xl mx-auto">
-        Comprehensive and personalized solutions that transform your space into
-        functional, modern, and durable places.
-      </p>
+  <section class="section pt-12 md:pt-16">
+    <div class="container-site grid gap-6 md:grid-cols-2">
+      {
+        services.map((service, i) => {
+          const name = titleCase(service.title);
+          const items = serviceLists(service.content)
+            .filter((g) => !/why choose|process/i.test(g.heading))
+            .flatMap((g) => g.items)
+            .slice(0, 8);
+          return (
+            <a href={serviceHref(service)} class="group flex flex-col overflow-hidden rounded-lg border border-ink/10 bg-cream transition-colors hover:border-ink/25">
+              <div class="rise overflow-hidden" style={`--delay:${i * 120}ms`}>
+                <img
+                  src={cld(service.image, 1000)}
+                  srcset={cldSrcset(service.image, [600, 1000])}
+                  sizes="(min-width: 768px) 46vw, 92vw"
+                  alt={`${name} project by Living Stone Contractors`}
+                  class="aspect-[16/10] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                  loading={i < 2 ? 'eager' : 'lazy'}
+                />
+              </div>
+              <div class="flex flex-1 flex-col p-7 md:p-9">
+                <div class="flex items-center gap-3 text-sm font-semibold text-primary-700">
+                  <span class="tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+                  <span class="h-px w-8 bg-current" />
+                  <Icon name={/commerc/i.test(service.title) ? 'building' : 'home'} size={18} />
+                </div>
+                <h2 class="mt-4 !text-3xl">{name}</h2>
+                <p class="mt-4 leading-relaxed text-secondary-600">{service.description}</p>
+                {items.length > 0 && (
+                  <ul class="mt-7 flex flex-wrap gap-2">
+                    {items.map((item) => (
+                      <li class="rounded-full border border-ink/10 px-3 py-1 text-sm text-secondary-700">{item}</li>
+                    ))}
+                  </ul>
+                )}
+                <span class="link-arrow mt-auto pt-8">
+                  View {name.toLowerCase()} services
+                  <Icon name="arrow" size={18} />
+                </span>
+              </div>
+            </a>
+          );
+        })
+      }
     </div>
   </section>
 
-  <!-- Services Grid -->
-  <section class="section-padding bg-white">
-    <div class="container-custom">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {sortedServices.map((service: any) => (
-          <ServiceCard
-            title={service.title}
-            description={service.description}
-            image={service.image}
-            href={`/services/${service.slug}`}
-            icon={service.icon}
-          />
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA Section -->
-  <section class="section-padding bg-primary-600 text-white">
-    <div class="container-custom">
-      <div class="max-w-4xl mx-auto text-center">
-        <h2 class="mb-6">Not Sure Which Service You Need?</h2>
-        <p class="text-xl mb-8 opacity-90">
-          Contact us for a free consultation. We'll help you determine the best solutions for your project.
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <a href="/contact" class="btn bg-white text-primary-600 hover:bg-gray-100 text-lg px-8 py-4">
-            Get Free Consultation
-          </a>
-          <a href="tel:+12023738568" class="btn btn-outline border-white text-white hover:bg-white hover:text-primary-600 text-lg px-8 py-4">
-            📞 (202) 373-8568
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
+  <CTABand title="Not sure which service you need?" text="Contact us for a free consultation. We will help you define the scope and the best solution for your project." />
 </MainLayout>

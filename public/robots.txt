@@ -4,7 +4,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://livingstonecontractors.com/sitemap-index.xml
+Sitemap: https://livingstonecontractorsllc.com/sitemap.xml
 
 # Disallow admin areas
 Disallow: /admin/

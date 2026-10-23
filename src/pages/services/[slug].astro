@@ -1,196 +1,113 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
+import CTABand from '../../components/CTABand.astro';
+import Icon from '../../components/Icon.astro';
+import PageHero from '../../components/PageHero.astro';
 import { marked } from 'marked';
+import { LICENSES, cld, getContact, getServices, hoursLines, normalizeRich, serviceHref, slugMatches, telHref, titleCase } from '../../lib/api';
 
-// API URL - use PORT env var for same-server setup
-const API_URL = `http://localhost:${process.env.PORT || 3001}`;
-
-// Get slug from URL
 const { slug } = Astro.params;
+const [services, contact] = await Promise.all([getServices(), getContact()]);
+const service = services.find((s) => slugMatches(s.slug, slug));
 
-let service: any = null;
-let otherServices: any[] = [];
-let contactInfo: any = {
-  phone: '(202) 373-8568',
-  email: 'lstonecontractors@gmail.com'
-};
-
-try {
-  // Fetch all services and contact info in parallel
-  const [servicesRes, contactRes] = await Promise.all([
-    fetch(`${API_URL}/api/services`),
-    fetch(`${API_URL}/api/contact`)
-  ]);
-
-  if (servicesRes.ok) {
-    const services = await servicesRes.json();
-    service = services.find((s: any) => s.slug?.trim().toLowerCase() === slug?.trim().toLowerCase());
-    otherServices = services
-      .filter((s: any) => s.slug !== slug)
-      .sort((a: any, b: any) => a.order - b.order)
-      .slice(0, 3);
-  }
-
-  if (contactRes.ok) {
-    contactInfo = await contactRes.json();
-  }
-} catch (error) {
-  console.error('Error fetching data:', error);
-}
-
-// Redirect to 404 if service not found
 if (!service) {
   return Astro.redirect('/404');
 }
 
-// Detect if content is Markdown and convert to HTML
+const name = titleCase(service.title);
+const others = services.filter((s) => s.id !== service.id).slice(0, 3);
+
+// Content from the admin is HTML; older entries may still be Markdown.
 let contentHtml = service.content || '';
-if (contentHtml && (contentHtml.includes('##') || contentHtml.includes('###') || contentHtml.match(/^[-*]\s/m))) {
+if (contentHtml && !/<[a-z][\s\S]*>/i.test(contentHtml)) {
   contentHtml = await marked(contentHtml);
 }
+contentHtml = normalizeRich(contentHtml);
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: `${name} Remodeling & Renovation`,
+  serviceType: name,
+  description: service.description,
+  image: service.image,
+  url: new URL(serviceHref(service), Astro.site).href,
+  areaServed: { '@type': 'State', name: 'Maryland' },
+  provider: { '@id': `${Astro.site}#business` },
+};
 ---
 
 <MainLayout
-  title={service.metaTitle || `${service.title} Services | Living Stone Contractors`}
+  title={service.metaTitle?.split('|')[0].trim() || `${name} Services`}
   description={service.metaDescription || service.description}
-  image={service.image}
+  image={cld(service.image, 1200)}
+  canonicalURL={new URL(serviceHref(service), Astro.site).href}
+  schema={schema}
 >
-  <!-- Hero Section -->
-  <section class="relative py-24 bg-gray-900">
-    <div class="absolute inset-0 bg-gradient-to-r from-black/70 to-black/50 z-10"></div>
-    <div
-      class="absolute inset-0 bg-cover bg-center"
-      style={`background-image: url('${service.image}');`}
-    ></div>
+  <PageHero
+    eyebrow={`Services · ${name}`}
+    title={name}
+    lead={service.description}
+    image={service.image}
+    imageAlt={`${name} project by Living Stone Contractors`}
+    measure={{ start: 'Maryland & DMV', end: 'Licensed & insured' }}
+  />
 
-    <div class="container-custom relative z-20 text-white">
-      <div class="max-w-3xl">
-        <h1 class="font-heading font-bold mb-6">{service.title}</h1>
-        <p class="text-xl">{service.description}</p>
-      </div>
-    </div>
-  </section>
+  <section class="section pt-14 md:pt-20">
+    <div class="container-site grid gap-14 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-20">
+      <article class="rich reveal max-w-3xl" set:html={contentHtml} />
 
-  <!-- Content Section -->
-  <section class="section-padding bg-white">
-    <div class="container-custom">
-      <div class="grid lg:grid-cols-3 gap-12">
-        <!-- Main Content -->
-        <div class="lg:col-span-2">
-          <article class="prose prose-lg max-w-none" set:html={contentHtml}>
-          </article>
-        </div>
-
-        <!-- Sidebar -->
-        <aside class="lg:col-span-1">
-          <!-- Contact Card -->
-          <div class="card p-8 sticky top-24">
-            <h3 class="font-heading font-bold text-2xl mb-4">Get Started Today</h3>
-            <p class="text-gray-600 mb-6">
-              Ready to begin your {service.title.toLowerCase()} project? Contact us for a free estimate.
-            </p>
-
-            <div class="space-y-4 mb-6">
-              <a
-                href={`tel:${contactInfo.phone?.replace(/[^0-9+]/g, '')}`}
-                class="flex items-center gap-3 text-gray-700 hover:text-primary-600 transition-colors"
-              >
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                </svg>
-                <div>
-                  <p class="text-sm text-gray-500">Call Us</p>
-                  <p class="font-semibold">{contactInfo.phone}</p>
+      <aside class="lg:sticky lg:top-28 lg:self-start">
+        <div class="reveal rounded-lg border border-ink/10 bg-white p-7" style="--delay:120ms">
+          <h2 class="!text-2xl">Get a free estimate</h2>
+          <p class="mt-3 text-secondary-600">Tell us about your {name.toLowerCase()} project and we will follow up with next steps.</p>
+          <a href="/contact" class="btn btn-primary mt-6 w-full">
+            Request an estimate
+            <Icon name="arrow" size={18} />
+          </a>
+          <a href={telHref(contact.phone)} class="btn btn-ghost mt-3 w-full">
+            <Icon name="phone" size={18} />
+            {contact.phone}
+          </a>
+          <dl class="mt-7 space-y-4 border-t border-ink/10 pt-6 text-sm">
+            {
+              LICENSES.map((l) => (
+                <div class="flex justify-between gap-4">
+                  <dt class="text-secondary-500">{l.label} License</dt>
+                  <dd class="font-semibold tabular-nums">#{l.number}</dd>
                 </div>
-              </a>
-
-              <a
-                href={`mailto:${contactInfo.email}`}
-                class="flex items-center gap-3 text-gray-700 hover:text-primary-600 transition-colors"
-              >
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                </svg>
-                <div>
-                  <p class="text-sm text-gray-500">Email Us</p>
-                  <p class="font-semibold break-all">{contactInfo.email}</p>
-                </div>
-              </a>
+              ))
+            }
+            <div>
+              <dt class="text-secondary-500">Hours</dt>
+              {hoursLines(contact.hours).map((line) => <dd class="mt-1 font-medium">{line}</dd>)}
             </div>
-
-            <a href="/contact" class="btn btn-primary w-full text-center">
-              Request Free Estimate
-            </a>
-          </div>
-        </aside>
-      </div>
+          </dl>
+        </div>
+      </aside>
     </div>
   </section>
 
-  <!-- Other Services Section -->
-  {otherServices.length > 0 && (
-    <section class="section-padding bg-gray-50">
-      <div class="container-custom">
-        <h2 class="text-3xl font-heading font-bold mb-8 text-center">Other Services</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {otherServices.map((otherService: any) => (
-            <a
-              href={`/services/${otherService.slug}`}
-              class="card overflow-hidden group block"
-            >
-              <div class="relative h-48 overflow-hidden bg-gray-200">
-                <img
-                  src={otherService.image}
-                  alt={otherService.title}
-                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  loading="lazy"
-                />
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                <div class="absolute bottom-4 left-4">
-                  <h3 class="text-white font-heading font-bold text-xl">{otherService.title}</h3>
-                </div>
-              </div>
-              <div class="p-6">
-                <p class="text-gray-600 line-clamp-2">{otherService.description}</p>
-              </div>
-            </a>
-          ))}
+  {
+    others.length > 0 && (
+      <section class="pb-20 md:pb-28">
+        <div class="container-site">
+          <h2 class="reveal !text-2xl md:!text-3xl">Other services</h2>
+          <div class="mt-8 grid gap-px overflow-hidden rounded-lg border border-ink/10 bg-ink/10 md:grid-cols-3">
+            {others.map((s) => (
+              <a href={serviceHref(s)} class="group flex items-center justify-between gap-6 bg-cream p-7 transition-colors hover:bg-white">
+                <span>
+                  <span class="block text-xl font-semibold">{titleCase(s.title)}</span>
+                  <span class="mt-1 line-clamp-2 block text-sm text-secondary-600">{s.description}</span>
+                </span>
+                <Icon name="arrow" size={20} class="shrink-0 transition-transform group-hover:translate-x-1" />
+              </a>
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
+
+  <CTABand />
 </MainLayout>
-
-<style>
-  .prose {
-    @apply text-gray-700;
-  }
-
-  .prose h2 {
-    @apply text-3xl font-heading font-bold text-gray-900 mt-8 mb-4;
-  }
-
-  .prose h3 {
-    @apply text-2xl font-heading font-bold text-gray-900 mt-6 mb-3;
-  }
-
-  .prose h4 {
-    @apply text-xl font-heading font-bold text-gray-900 mt-4 mb-2;
-  }
-
-  .prose p {
-    @apply mb-4;
-  }
-
-  .prose ul {
-    @apply list-disc pl-6 mb-4 space-y-2;
-  }
-
-  .prose ol {
-    @apply list-decimal pl-6 mb-4 space-y-2;
-  }
-
-  .prose a {
-    @apply text-primary-600 hover:text-primary-700 underline;
-  }
-</style>

@@ -1,286 +1,286 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
-import ServiceCard from '../components/ServiceCard.astro';
+import BrandMark from '../components/BrandMark.astro';
+import BuildSequence from '../components/BuildSequence.astro';
+import CTABand from '../components/CTABand.astro';
+import Icon from '../components/Icon.astro';
+import Measure from '../components/Measure.astro';
+import {
+  LICENSES,
+  cld,
+  cldSrcset,
+  getContact,
+  getHome,
+  getServices,
+  getTestimonials,
+  processSteps,
+  serviceHref,
+  serviceLists,
+  splitFeatureTitle,
+  telHref,
+  titleCase,
+} from '../lib/api';
 
-// API URL - use PORT env var for same-server setup
-const API_URL = `http://localhost:${process.env.PORT || 3001}`;
+const [home, services, testimonials, contact] = await Promise.all([getHome(), getServices(), getTestimonials(), getContact()]);
+const featured = services.filter((s) => s.featured);
+const showcase = featured.length ? featured : services;
+const residential = services.find((s) => /resid/i.test(s.title));
+const steps = processSteps(services);
 
-// Fetch page content from API
-let pageData = {
-  heroTitle: 'Transform Your Home',
-  heroSubtitle: 'Build Your Dreams',
-  heroDescription: 'Transforming spaces into functional, modern, and durable places',
-  heroImage: '/images/placeholders/hero-bg.png',
-  whyChooseTitle: 'Why Choose Living Stone Contractors?',
-  whyChooseDescription: 'We are passionate about every detail of the process, from planning to execution, ensuring high-quality results that reflect the style and needs of each client. Our approach combines technical expertise, premium materials, and reliable service.',
-  feature1Title: 'Licensed & Insured',
-  feature1Description: 'Fully licensed contractors with comprehensive insurance coverage',
-  feature2Title: 'Transparent Pricing',
-  feature2Description: 'No hidden fees. Clear estimates before we start',
-  feature3Title: 'Expert Team',
-  feature3Description: 'Skilled craftsmen with decades of combined experience'
-};
+const features = [
+  { icon: 'shield', ...splitFeatureTitle(home.feature1Title), text: home.feature1Description },
+  { icon: 'tag', ...splitFeatureTitle(home.feature2Title), text: home.feature2Description },
+  { icon: 'team', ...splitFeatureTitle(home.feature3Title), text: home.feature3Description },
+] as const;
 
-let featuredServices = [];
-let testimonials = [];
-let contactInfo = {
-  phone: '(202) 373-8568',
-  email: 'lstonecontractors@gmail.com'
-};
-
-try {
-  // Fetch page content
-  const pagesRes = await fetch(`${API_URL}/api/pages`);
-  if (pagesRes.ok) {
-    const pagesData = await pagesRes.json();
-    if (pagesData.home) {
-      pageData = { ...pageData, ...pagesData.home };
-    }
-  }
-
-  // Fetch services
-  const servicesRes = await fetch(`${API_URL}/api/services`);
-  if (servicesRes.ok) {
-    const services = await servicesRes.json();
-    featuredServices = services
-      .filter((s: any) => s.featured)
-      .sort((a: any, b: any) => a.order - b.order);
-  }
-
-  // Fetch testimonials
-  const testimonialsRes = await fetch(`${API_URL}/api/testimonials`);
-  if (testimonialsRes.ok) {
-    testimonials = await testimonialsRes.json();
-  }
-
-  // Fetch contact info
-  const contactRes = await fetch(`${API_URL}/api/contact`);
-  if (contactRes.ok) {
-    contactInfo = await contactRes.json();
-  }
-} catch (error) {
-  console.error('Error fetching data from API:', error);
-}
+const [mhic, commercial] = LICENSES;
 ---
 
 <MainLayout
-  title="Living Stone Contractors, LLC - Home Remodeling & Improvement Specialists"
-  description="Specialized in home remodeling, improvement, and commercial renovations, transforming spaces into functional, modern, and durable places. Technical expertise, premium materials, and reliable service."
+  title="Living Stone Contractors | Home Remodeling & Commercial Renovations in Maryland"
+  description="Home remodeling, home improvement, and commercial renovations in Maryland and the DMV area. Kitchens, baths, basements, office build-outs, metal stud framing, drywall, and acoustical ceilings. Licensed and insured. Free estimates."
 >
-  <!-- Hero Section -->
-  <section class="relative h-screen min-h-[600px] flex items-center justify-center bg-secondary-900">
-    <div class="absolute inset-0 bg-gradient-to-r from-black/70 to-black/50 z-10"></div>
-    <div
-      class="absolute inset-0 bg-cover bg-center"
-      style={`background-image: url('${pageData.heroImage}');`}
-    ></div>
-
-    <div class="container-custom relative z-20 text-white text-center">
-      <h1 class="font-heading font-bold mb-6">
-        {pageData.heroTitle}<br />
-        <span class="text-primary-400">{pageData.heroSubtitle}</span>
-      </h1>
-      <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
-        {pageData.heroDescription}
-      </p>
-      <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a href="/contact" class="btn btn-primary text-lg px-8 py-4">
-          Get Free Estimate
-        </a>
-        <a href={`tel:${contactInfo.phone?.replace(/[^0-9+]/g, '')}`} class="btn btn-outline text-lg px-8 py-4">
-          Call Us Now
-        </a>
-      </div>
-    </div>
-
-    <!-- Scroll indicator -->
-    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 animate-bounce">
-      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-      </svg>
-    </div>
-  </section>
-
-  <!-- About Section -->
-  <section class="section-padding bg-white">
-    <div class="container-custom">
-      <div class="grid md:grid-cols-2 gap-12 items-center">
+  <!-- Hero -->
+  <section class="pt-10 md:pt-16">
+    <div class="container-site">
+      <div class="grid gap-10 lg:grid-cols-[1.35fr_1fr] lg:items-end lg:gap-16">
         <div>
-          <h2 class="mb-6">{pageData.whyChooseTitle}</h2>
-          <p class="text-lg text-gray-600 mb-6">
-            {pageData.whyChooseDescription}
+          <div class="flex items-center gap-4">
+            <BrandMark class="h-11 w-11" />
+            <p class="hero-in text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-secondary-500">Residential & Commercial · Maryland & DMV</p>
+          </div>
+          <h1 class="mt-8">
+            <span class="line"><span class="hero-in" style="--i:1">{home.heroTitle}.</span></span>
+            <span class="line"><span class="hero-in text-primary-600" style="--i:2">{home.heroSubtitle}.</span></span>
+          </h1>
+        </div>
+        <div class="lg:pb-3">
+          <p class="hero-in text-lg leading-relaxed text-secondary-600" style="--i:3">
+            {home.heroDescription} Home remodeling, home improvement, and commercial renovations, managed from first walkthrough to final inspection.
           </p>
-          <div class="space-y-4">
-            <div class="flex items-start gap-4">
-              <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </div>
-              <div>
-                <h4 class="font-semibold mb-1">{pageData.feature1Title}</h4>
-                <p class="text-gray-600">{pageData.feature1Description}</p>
-              </div>
-            </div>
-            <div class="flex items-start gap-4">
-              <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </div>
-              <div>
-                <h4 class="font-semibold mb-1">{pageData.feature2Title}</h4>
-                <p class="text-gray-600">{pageData.feature2Description}</p>
-              </div>
-            </div>
-            <div class="flex items-start gap-4">
-              <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                </svg>
-              </div>
-              <div>
-                <h4 class="font-semibold mb-1">{pageData.feature3Title}</h4>
-                <p class="text-gray-600">{pageData.feature3Description}</p>
-              </div>
-            </div>
+          <div class="hero-in mt-8 flex flex-col gap-3 sm:flex-row" style="--i:4">
+            <a href="/contact" class="btn btn-primary">
+              Get a Free Estimate
+              <Icon name="arrow" size={18} />
+            </a>
+            <a href={telHref(contact.phone)} class="btn btn-ghost">
+              <Icon name="phone" size={18} />
+              {contact.phone}
+            </a>
           </div>
         </div>
-        <div class="relative text-center">
-          <img
-            src="/images/logos/LSC_principal con slogan_Color.png"
-            alt="Living Stone Contractors"
-            class="w-full max-w-md mx-auto"
-          />
-          <!-- <p class="text-sm text-gray-600 mt-2">License #165925</p> -->
+      </div>
+
+      <Measure class="mt-14 md:mt-20" start={`MHIC #${mhic.number}`} label="Licensed & insured" end={`Commercial #${commercial.number}`} />
+
+      <figure class="hero-photo rise relative mt-4 overflow-hidden rounded-lg" style="--delay:250ms" data-parallax>
+        <img
+          src={cld(home.heroImage, 1600)}
+          srcset={cldSrcset(home.heroImage, [800, 1200, 1600, 2200])}
+          sizes="(min-width: 1280px) 1200px, 100vw"
+          alt="Living Stone Contractors crew renovating a school gymnasium"
+          class="aspect-[4/5] w-full object-cover sm:aspect-[16/9] lg:aspect-[21/9]"
+          fetchpriority="high"
+        />
+        <figcaption class="absolute bottom-0 left-0 m-4 rounded bg-cream/95 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-ink">
+          Commercial renovation · School facility
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- Services -->
+  <section class="section" id="services">
+    <div class="container-site">
+      <header class="grid gap-6 lg:grid-cols-2 lg:items-end">
+        <div>
+          <span class="eyebrow reveal">What we do</span>
+          <h2 class="reveal mt-5" style="--delay:60ms">Residential and commercial, built to the same standard.</h2>
+        </div>
+        <p class="lead reveal lg:pb-2" style="--delay:120ms">
+          One team for homeowners, property owners, businesses, and general contractors across Maryland and the DMV.
+        </p>
+      </header>
+
+      <div class="mt-16 grid gap-24 md:mt-24 md:gap-32">
+        {
+          showcase.map((service, i) => {
+            const lists = serviceLists(service.content).filter((g) => !/why choose|process/i.test(g.heading)).slice(0, 2);
+            const name = titleCase(service.title);
+            return (
+              <article class:list={['grid items-start gap-10 lg:grid-cols-2 lg:gap-16', { 'lg:[&>*:first-child]:order-2': i % 2 === 1 }]}>
+                <a href={serviceHref(service)} class="rise group relative block overflow-hidden rounded-lg" aria-label={`${name} services`}>
+                  <img
+                    src={cld(service.image, 1100)}
+                    srcset={cldSrcset(service.image, [600, 900, 1200])}
+                    sizes="(min-width: 1024px) 45vw, 92vw"
+                    alt={`${name} project by Living Stone Contractors`}
+                    class="aspect-[5/4] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                    loading="lazy"
+                  />
+                </a>
+
+                <div class="lg:pt-4">
+                  <div class="reveal flex items-center gap-3 text-sm font-semibold text-primary-700">
+                    <span class="tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+                    <span class="h-px w-8 bg-current"></span>
+                    <Icon name={/commerc/i.test(service.title) ? 'building' : 'home'} size={18} />
+                  </div>
+                  <h3 class="reveal mt-4 text-3xl md:text-[2.5rem] md:leading-tight" style="--delay:60ms">{name}</h3>
+                  <p class="reveal mt-5 text-lg leading-relaxed text-secondary-600" style="--delay:100ms">{service.description}</p>
+
+                  {lists.map((group) => (
+                    <div class="mt-9">
+                      <p class="reveal text-xs font-semibold uppercase tracking-[0.18em] text-secondary-500">{group.heading}</p>
+                      <ul class="lay mt-4 grid border-t border-ink/10 sm:grid-cols-2 sm:gap-x-8">
+                        {group.items.map((item, j) => (
+                          <li class="flex items-center gap-3 border-b border-ink/10 py-3 text-[0.97rem] text-ink" style={`--i:${j}`}>
+                            <span class="h-1.5 w-1.5 shrink-0 bg-primary-600"></span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+
+                  <a href={serviceHref(service)} class="link-arrow reveal mt-9">
+                    View {name.toLowerCase()} services
+                    <Icon name="arrow" size={18} />
+                  </a>
+                </div>
+              </article>
+            );
+          })
+        }
+      </div>
+    </div>
+  </section>
+
+  <BuildSequence steps={steps} />
+
+  <!-- Why choose -->
+  <section class="section">
+    <div class="container-site">
+      <Measure label="Why Living Stone" />
+      <div class="mt-14 grid gap-14 lg:grid-cols-[1fr_1.1fr] lg:items-center lg:gap-20">
+        {
+          residential?.image && (
+            <figure class="rise relative overflow-hidden rounded-lg">
+              <img
+                src={cld(residential.image, 1000)}
+                srcset={cldSrcset(residential.image, [600, 1000])}
+                sizes="(min-width: 1024px) 40vw, 92vw"
+                alt="Living Stone Contractors on a residential job site in Maryland"
+                class="aspect-[4/5] w-full object-cover"
+                loading="lazy"
+              />
+            </figure>
+          )
+        }
+
+        <div>
+          <h2 class="reveal">{home.whyChooseTitle}</h2>
+          <p class="lead reveal mt-6" style="--delay:80ms">{home.whyChooseDescription}</p>
+
+          <ul class="lay mt-10 border-t border-ink/10">
+            {
+              features.map((f, i) => (
+                <li class="flex gap-5 border-b border-ink/10 py-6" style={`--i:${i}`}>
+                  <Icon name={f.icon} size={26} class="mt-0.5 shrink-0 text-primary-600" />
+                  <div>
+                    <h3 class="text-lg md:text-xl">{f.title}</h3>
+                    <p class="mt-1.5 text-secondary-600">{f.text}</p>
+                    {f.detail && <p class="mt-2 text-sm font-semibold tabular-nums text-primary-700">{f.detail}</p>}
+                  </div>
+                </li>
+              ))
+            }
+          </ul>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Services Section -->
-  <section class="section-padding bg-gray-50">
-    <div class="container-custom">
-      <div class="text-center mb-12">
-        <h2 class="mb-4">Our Services</h2>
-        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-          From interior renovations to complete exterior makeovers, we offer comprehensive
-          home improvement services to meet all your needs.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {featuredServices.map((service: any) => (
-          <ServiceCard
-            title={service.title}
-            description={service.description}
-            image={service.image}
-            href={`/services/${service.slug}`}
-            icon={service.icon}
-          />
-        ))}
-      </div>
-
-      <div class="text-center mt-12">
-        <a href="/services" class="btn btn-primary text-lg">
-          View All Services
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA Section -->
-  <section class="section-padding bg-primary-600 text-white">
-    <div class="container-custom">
-      <div class="max-w-4xl mx-auto text-center">
-        <h2 class="mb-6">Ready to Start Your Project?</h2>
-        <p class="text-xl mb-8 opacity-90">
-          Get a free, no-obligation estimate today. Our team is ready to bring your vision to life.
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <a href="/contact" class="btn bg-white text-primary-600 hover:bg-gray-100 text-lg px-8 py-4">
-            Get Free Estimate
-          </a>
-          <a href={`tel:${contactInfo.phone?.replace(/[^0-9+]/g, '')}`} class="btn btn-outline border-white text-white hover:bg-white hover:text-primary-600 text-lg px-8 py-4">
-            {contactInfo.phone}
-          </a>
+  <!-- Testimonials -->
+  {
+    testimonials.length > 0 && (
+      <section class="pb-20 md:pb-28">
+        <div class="container-site">
+          <Measure label="Client reviews" />
+          <h2 class="reveal mt-14 max-w-xl">What our clients say.</h2>
+          <div class="mt-12 grid gap-px overflow-hidden rounded-lg border border-ink/10 bg-ink/10 md:grid-cols-3">
+            {testimonials.slice(0, 3).map((t, i) => (
+              <figure class="reveal flex flex-col bg-cream p-8 md:p-10" style={`--delay:${i * 90}ms`}>
+                <Icon name="quote" size={28} class="text-primary-600" />
+                <blockquote class="mt-6 flex-1 text-lg leading-relaxed text-ink">{t.content}</blockquote>
+                <figcaption class="mt-8 flex items-center justify-between gap-4 text-sm">
+                  <span class="font-semibold">
+                    {t.name}
+                    {t.company && <span class="block font-normal text-secondary-500">{t.company}</span>}
+                  </span>
+                  <span class="text-primary-700" aria-label={`${t.rating || 5} out of 5 stars`}>{'★'.repeat(t.rating || 5)}</span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
         </div>
-      </div>
-    </div>
-  </section>
+      </section>
+    )
+  }
 
-  <!-- Testimonials Section -->
-  <section class="section-padding bg-white">
-    <div class="container-custom">
-      <div class="text-center mb-12">
-        <h2 class="mb-4">What Our Clients Say</h2>
-        <p class="text-lg text-gray-600">Don't just take our word for it</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {testimonials.length > 0 ? (
-          testimonials.slice(0, 3).map((testimonial: any) => (
-            <div class="card p-8">
-              <div class="flex gap-1 mb-4">
-                {[...Array(testimonial.rating || 5)].map(() => (
-                  <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                ))}
-              </div>
-              <p class="text-gray-600 mb-4">"{testimonial.content}"</p>
-              <p class="font-semibold">- {testimonial.name}{testimonial.company ? `, ${testimonial.company}` : ''}</p>
-            </div>
-          ))
-        ) : (
-          <>
-            <div class="card p-8">
-              <div class="flex gap-1 mb-4">
-                {[...Array(5)].map(() => (
-                  <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                ))}
-              </div>
-              <p class="text-gray-600 mb-4">
-                "Excellent work on our kitchen remodel. Professional, on time, and within budget.
-                Couldn't be happier with the results!"
-              </p>
-              <p class="font-semibold">- John & Sarah M.</p>
-            </div>
-
-            <div class="card p-8">
-              <div class="flex gap-1 mb-4">
-                {[...Array(5)].map(() => (
-                  <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                ))}
-              </div>
-              <p class="text-gray-600 mb-4">
-                "Living Stone transformed our basement into a beautiful living space. The attention
-                to detail was outstanding. Highly recommend!"
-              </p>
-              <p class="font-semibold">- Michael R.</p>
-            </div>
-
-            <div class="card p-8">
-              <div class="flex gap-1 mb-4">
-                {[...Array(5)].map(() => (
-                  <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                ))}
-              </div>
-              <p class="text-gray-600 mb-4">
-                "New roof looks amazing and was completed ahead of schedule. The crew was
-                respectful and cleaned up perfectly. Five stars!"
-              </p>
-              <p class="font-semibold">- Patricia L.</p>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  </section>
+  <CTABand />
 </MainLayout>
+
+<style>
+  h1 .line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.06em;
+  }
+  h1 .line > span {
+    display: inline-block;
+  }
+  .hero-in {
+    opacity: 0;
+    transform: translateY(0.5em);
+    animation: hero-rise 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: calc(0.35s + var(--i, 0) * 0.1s);
+  }
+  h1 .hero-in {
+    transform: translateY(105%);
+    opacity: 1;
+  }
+  @keyframes hero-rise {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .hero-photo img {
+    scale: 1.1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-photo img {
+      scale: 1;
+    }
+    .hero-in {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  // The hero photo drifts slightly slower than the page, like looking up at a structure.
+  const photo = document.querySelector<HTMLElement>('[data-parallax] img');
+  if (photo && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const y = Math.min(window.scrollY, window.innerHeight * 1.2);
+      photo.style.translate = `0 ${y * -0.05}px`;
+    };
+    window.addEventListener('scroll', () => frame || (frame = requestAnimationFrame(update)), { passive: true });
+  }
+</script>

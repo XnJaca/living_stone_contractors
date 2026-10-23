@@ -8,19 +8,15 @@ export interface Props {
   description?: string;
   image?: string;
   canonicalURL?: string;
+  schema?: Record<string, unknown>;
 }
 
-const { title, description, image, canonicalURL } = Astro.props;
+const seo = Astro.props;
 ---
 
-<BaseLayout
-  title={title}
-  description={description}
-  image={image}
-  canonicalURL={canonicalURL}
->
+<BaseLayout {...seo}>
   <Header />
-  <main>
+  <main id="main">
     <slot />
   </main>
   <Footer />

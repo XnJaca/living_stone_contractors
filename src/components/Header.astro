@@ -1,5 +1,9 @@
 ---
-const currentPath = Astro.url.pathname;
+import Icon from './Icon.astro';
+import { getContact, telHref } from '../lib/api';
+
+const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+const contact = await getContact();
 
 const navItems = [
   { name: 'Home', href: '/' },
@@ -8,134 +12,159 @@ const navItems = [
   { name: 'Contact', href: '/contact' },
 ];
 
-// Fetch contact info from API - use PORT env var for same-server setup
-const API_URL = `http://localhost:${process.env.PORT || 3001}`;
-let contactInfo = {
-  phone: '(202) 373-8568',
-  email: 'lstonecontractors@gmail.com'
-};
-
-try {
-  const res = await fetch(`${API_URL}/api/contact`);
-  if (res.ok) {
-    contactInfo = await res.json();
-  }
-} catch (error) {
-  console.error('Error fetching contact info:', error);
-}
+const isActive = (href: string) => (href === '/' ? currentPath === '/' : currentPath.startsWith(href));
 ---
 
-<header class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
-  <nav class="container-custom">
-    <div class="flex items-center justify-between py-2 md:py-3">
-      <!-- Logo -->
-      <a href="/" class="flex items-center">
-        <img
-          src="/images/logos/LSC_secundario_Color.png"
-          alt="Living Stone Contractors"
-          class="h-20 md:h-24 lg:h-28 w-auto scale-125 md:scale-150"
-        />
+<a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded focus:bg-cream focus:px-4 focus:py-2">
+  Skip to content
+</a>
+
+<header class="site-header" data-header>
+  <nav class="container-site flex h-[4.5rem] items-center justify-between gap-6 md:h-20" aria-label="Main">
+    <a href="/" class="block shrink-0" aria-label="Living Stone Contractors home">
+      <img src="/images/brand/logo-horizontal-color.webp" alt="" width="640" height="254" class="h-10 w-auto md:h-12" />
+    </a>
+
+    <ul class="hidden items-center gap-9 md:flex">
+      {
+        navItems.map((item) => (
+          <li>
+            <a href={item.href} class:list={['nav-link', { 'is-active': isActive(item.href) }]} aria-current={isActive(item.href) ? 'page' : undefined}>
+              {item.name}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="hidden items-center gap-5 md:flex">
+      <a href={telHref(contact.phone)} class="nav-phone inline-flex items-center gap-2 text-sm font-semibold">
+        <Icon name="phone" size={17} />
+        {contact.phone}
       </a>
-
-      <!-- Desktop Navigation -->
-      <div class="hidden md:flex items-center space-x-8">
-        {navItems.map((item) => (
-          <a
-            href={item.href}
-            class={`font-medium transition-colors ${
-              currentPath === item.href
-                ? 'text-primary-600'
-                : 'text-gray-700 hover:text-primary-600'
-            }`}
-          >
-            {item.name}
-          </a>
-        ))}
-      </div>
-
-      <!-- CTA Button -->
-      <div class="hidden md:flex items-center space-x-4">
-        <a
-          href={`tel:${contactInfo.phone?.replace(/[^0-9+]/g, '')}`}
-          class="text-primary-600 font-semibold hover:text-primary-700"
-        >
-          {contactInfo.phone}
-        </a>
-        <a href="/contact" class="btn btn-primary">
-          Free Estimate
-        </a>
-      </div>
-
-      <!-- Mobile Menu Button -->
-      <button
-        id="mobile-menu-button"
-        class="md:hidden p-2 rounded-lg hover:bg-gray-100"
-        aria-label="Toggle mobile menu"
-      >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M4 6h16M4 12h16M4 18h16"
-          ></path>
-        </svg>
-      </button>
+      <a href="/contact" class="btn btn-primary !px-5 !py-2.5 text-sm">Free Estimate</a>
     </div>
 
-    <!-- Mobile Menu -->
-    <div id="mobile-menu" class="hidden md:hidden pb-4">
-      <div class="flex flex-col space-y-4">
-        {navItems.map((item) => (
-          <a
-            href={item.href}
-            class={`font-medium py-2 transition-colors ${
-              currentPath === item.href
-                ? 'text-primary-600'
-                : 'text-gray-700 hover:text-primary-600'
-            }`}
-          >
-            {item.name}
-          </a>
-        ))}
-        <a
-          href={`tel:${contactInfo.phone?.replace(/[^0-9+]/g, '')}`}
-          class="text-primary-600 font-semibold py-2"
-        >
-          {contactInfo.phone}
-        </a>
-        <a href="/contact" class="btn btn-primary">
-          Free Estimate
-        </a>
-      </div>
-    </div>
+    <button type="button" class="menu-btn -mr-2 grid h-11 w-11 place-items-center md:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu" data-menu-btn>
+      <Icon name="menu" size={26} class="icon-open" />
+      <Icon name="close" size={26} class="icon-close hidden" />
+    </button>
   </nav>
+
+  <div id="mobile-menu" class="mobile-menu md:hidden" hidden data-menu>
+    <div class="container-site flex flex-col pb-8 pt-2">
+      {
+        navItems.map((item) => (
+          <a href={item.href} class:list={['border-b border-ink/10 py-4 text-2xl font-semibold', isActive(item.href) ? 'text-primary-700' : 'text-ink']}>
+            {item.name}
+          </a>
+        ))
+      }
+      <a href="/contact" class="btn btn-primary mt-8 w-full">Get a Free Estimate</a>
+      <a href={telHref(contact.phone)} class="btn btn-ghost mt-3 w-full">
+        <Icon name="phone" size={18} />
+        {contact.phone}
+      </a>
+    </div>
+  </div>
 </header>
 
-<!-- Spacer to prevent content from going under fixed header -->
-<div class="h-20 md:h-24"></div>
+<div class="h-[4.5rem] md:h-20" aria-hidden="true"></div>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    color: #1f2117;
+    background: rgb(252 249 243 / 0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s ease;
+  }
+  .site-header.is-scrolled,
+  .site-header.is-open {
+    border-color: rgb(31 33 23 / 0.08);
+  }
+  /* Scroll progress, drawn like a measuring line under the header. */
+  .site-header::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    height: 1px;
+    width: 100%;
+    background: #6b8f4e;
+    transform: scaleX(var(--progress, 0));
+    transform-origin: left;
+  }
+  .nav-link {
+    position: relative;
+    font-size: 0.92rem;
+    font-weight: 500;
+    padding: 0.4rem 0;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+  }
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: #6b8f4e;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .nav-link:hover,
+  .nav-link.is-active {
+    opacity: 1;
+  }
+  .nav-link:hover::after,
+  .nav-link.is-active::after {
+    transform: scaleX(1);
+  }
+
+  .nav-phone {
+    transition: color 0.2s ease;
+  }
+  .nav-phone:hover {
+    color: #5a7841;
+  }
+
+  .mobile-menu {
+    height: calc(100dvh - 4.5rem);
+    overflow-y: auto;
+  }
+</style>
 
 <script>
-  // Mobile menu toggle
-  const button = document.getElementById('mobile-menu-button');
-  const menu = document.getElementById('mobile-menu');
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const btn = document.querySelector<HTMLButtonElement>('[data-menu-btn]');
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
 
-  button?.addEventListener('click', () => {
-    menu?.classList.toggle('hidden');
-  });
+  const onScroll = () => {
+    header?.classList.toggle('is-scrolled', window.scrollY > 24);
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    header?.style.setProperty('--progress', String(max > 0 ? window.scrollY / max : 0));
+  };
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
 
-  // Close mobile menu when clicking outside
-  document.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-    if (!button?.contains(target) && !menu?.contains(target)) {
-      menu?.classList.add('hidden');
-    }
-  });
+  const setOpen = (open: boolean) => {
+    if (!menu || !btn || !header) return;
+    menu.hidden = !open;
+    header.classList.toggle('is-open', open);
+    btn.setAttribute('aria-expanded', String(open));
+    btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    btn.querySelector('.icon-open')?.classList.toggle('hidden', open);
+    btn.querySelector('.icon-close')?.classList.toggle('hidden', !open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  };
 
-  // Close mobile menu on window resize
-  window.addEventListener('resize', () => {
-    if (window.innerWidth >= 768) {
-      menu?.classList.add('hidden');
-    }
-  });
+  btn?.addEventListener('click', () => setOpen(menu?.hidden ?? false));
+  document.addEventListener('keydown', (e) => e.key === 'Escape' && setOpen(false));
+  window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => e.matches && setOpen(false));
 </script>

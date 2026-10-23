@@ -1,0 +1,47 @@
+---
+// The logo's house mark as two strokes, so it can be drawn on like a sketch.
+export interface Props {
+  class?: string;
+  animate?: boolean;
+}
+
+const { class: className = '', animate = true } = Astro.props;
+---
+
+<svg class:list={['mark', { 'mark-animate': animate }, className]} viewBox="720 500 470 470" aria-hidden="true">
+  <path class="mark-ink" d="M756 953 V648 L885 530 L1025 645 M792 616 V551" pathLength="1" />
+  <path class="mark-green" d="M1150 937 H903 V662 L1168 852 V648 L1025 530" pathLength="1" />
+</svg>
+
+<style>
+  .mark path {
+    fill: none;
+    stroke-width: 37;
+    stroke-linejoin: miter;
+  }
+  .mark-ink {
+    stroke: #1f2117;
+  }
+  .mark-green {
+    stroke: #6b8f4e;
+  }
+  .mark-animate path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: mark-draw 1.6s cubic-bezier(0.65, 0, 0.35, 1) 0.2s forwards;
+  }
+  .mark-animate .mark-green {
+    animation-delay: 0.7s;
+  }
+  @keyframes mark-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mark-animate path {
+      animation: none;
+      stroke-dashoffset: 0;
+    }
+  }
+</style>
